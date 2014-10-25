@@ -26,24 +26,18 @@ public class ConditionsBaseField {
     private int maxLevel;
     private float noiseMultiplier;
     private Function<Float, Float> function;
-    private float minimumValue;
-    private float maximumValue;
 
     public ConditionsBaseField(int seaLevel, int maxLevel, float noiseMultiplier,
-                               Function<Float, Float> function, long conditionSeed,
-                               float minimumValue, float maximumValue) {
+                               Function<Float, Float> function, long conditionSeed) {
         this.seaLevel = seaLevel;
         this.maxLevel = maxLevel;
         this.noiseMultiplier = noiseMultiplier;
         this.function = function;
-        this.minimumValue = minimumValue;
-        this.maximumValue = maximumValue;
         noiseTable = new SimplexNoise(conditionSeed);
     }
 
     public float get(float x, float y, float z) {
-        float conditionAlpha = TeraMath.clamp(getConditionAlpha(x, y, z), 0, 1);
-        return minimumValue + (conditionAlpha * (maximumValue - minimumValue));
+        return TeraMath.clamp(getConditionAlpha(x, y, z), 0, 1);
     }
 
     private float getConditionAlpha(float x, float y, float z) {
