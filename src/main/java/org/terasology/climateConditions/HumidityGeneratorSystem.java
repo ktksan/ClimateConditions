@@ -15,6 +15,7 @@
  */
 package org.terasology.climateConditions;
 
+import com.google.common.collect.Maps;
 import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
@@ -22,6 +23,7 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.location.ImmutableBlockLocation;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.world.block.BlockComponent;
@@ -45,26 +47,26 @@ public class HumidityGeneratorSystem extends BaseComponentSystem {
                 });
     }
 
-    private Map<Vector3i, HumidityGeneratorComponent> activeComponents = new HashMap<>();
+    private Map<ImmutableBlockLocation, HumidityGeneratorComponent> activeComponents = Maps.newHashMap();
 
     @ReceiveEvent
     public void componentActivated(OnActivatedComponent event, HumidityGeneratorComponent generator, BlockComponent block) {
-        activeComponents.put(block.getPosition(), generator);
+        activeComponents.put(new ImmutableBlockLocation(block.getPosition()), generator);
     }
 
     @ReceiveEvent
     public void componentUpdated(OnChangedComponent event, HumidityGeneratorComponent generator, BlockComponent block) {
-        activeComponents.put(block.getPosition(), generator);
+        activeComponents.put(new ImmutableBlockLocation(block.getPosition()), generator);
     }
 
     @ReceiveEvent
     public void componentDeactivated(BeforeDeactivateComponent event, HumidityGeneratorComponent generator, BlockComponent block) {
-        activeComponents.remove(block.getPosition());
+        activeComponents.remove(new ImmutableBlockLocation(block.getPosition()));
     }
 
     private float getValue(float value, float x, float y, float z) {
-        for (Map.Entry<Vector3i, HumidityGeneratorComponent> entry : activeComponents.entrySet()) {
-            Vector3i location = entry.getKey();
+        for (Map.Entry<ImmutableBlockLocation, HumidityGeneratorComponent> entry : activeComponents.entrySet()) {
+            ImmutableBlockLocation location = entry.getKey();
             HumidityGeneratorComponent generator = entry.getValue();
 
             if ((generator.humidity > value && generator.humidifier)
@@ -82,7 +84,7 @@ public class HumidityGeneratorSystem extends BaseComponentSystem {
         return value;
     }
 
-    private float getDistance(float x, float y, float z, Vector3i location) {
+    private float getDistance(float x, float y, float z, ImmutableBlockLocation location) {
         return (float) Math.sqrt((location.x - x) * (location.x - x)
                 + (location.y - y) * (location.y - y) + (location.z - z) * (location.z - z));
     }
