@@ -20,6 +20,7 @@ import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
@@ -28,7 +29,7 @@ import org.terasology.world.block.BlockComponent;
 import java.util.HashMap;
 import java.util.Map;
 
-@RegisterSystem
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class TemperatureGeneratorSystem extends BaseComponentSystem {
     @In
     private ClimateConditionsSystem environmentSystem;
