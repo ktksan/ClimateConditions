@@ -16,5 +16,5 @@
 package org.terasology.climateConditions;
 
 public interface ConditionModifier {
-    public float getCondition(float value, float x, float y, float z);
+    float getCondition(float value, float x, float y, float z);
 }

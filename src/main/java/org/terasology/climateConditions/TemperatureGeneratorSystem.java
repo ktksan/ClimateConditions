@@ -24,17 +24,17 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.ImmutableBlockLocation;
-import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.world.block.BlockComponent;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class TemperatureGeneratorSystem extends BaseComponentSystem {
     @In
     private ClimateConditionsSystem environmentSystem;
+
+    private Map<ImmutableBlockLocation, TemperatureGeneratorComponent> activeComponents = Maps.newHashMap();
 
     @Override
     public void preBegin() {
@@ -46,8 +46,6 @@ public class TemperatureGeneratorSystem extends BaseComponentSystem {
                     }
                 });
     }
-
-    private Map<ImmutableBlockLocation, TemperatureGeneratorComponent> activeComponents = Maps.newHashMap();
 
     @ReceiveEvent
     public void componentActivated(OnActivatedComponent event, TemperatureGeneratorComponent generator, BlockComponent block) {
@@ -64,7 +62,8 @@ public class TemperatureGeneratorSystem extends BaseComponentSystem {
         activeComponents.remove(new ImmutableBlockLocation(block.getPosition()));
     }
 
-    private float getValue(float value, float x, float y, float z) {
+    private float getValue(float baseValue, float x, float y, float z) {
+        float value = baseValue;
         for (Map.Entry<ImmutableBlockLocation, TemperatureGeneratorComponent> entry : activeComponents.entrySet()) {
             ImmutableBlockLocation location = entry.getKey();
             TemperatureGeneratorComponent generator = entry.getValue();
