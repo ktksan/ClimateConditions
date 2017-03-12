@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.world.WorldProvider;
@@ -43,9 +44,12 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
 
     private float humidityMinimum;
     private float humidityMaximum;
-
-    @In
-    private WorldProvider worldProvider;
+    
+    private String worldSeed;
+    
+    public void setWorldSeed(String worldSeed){
+    	this.worldSeed = worldSeed;
+    }
 
     public void addTemperatureModifier(float order, ConditionModifier temperatureModifier) {
         temperatureModifiers.put(order, temperatureModifier);
@@ -57,8 +61,8 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
 
     public void configureTemperature(int seaLevel, int maxLevel, float diversity, Function<Float, Float> function,
                                      float minimumValue, float maximumValue) {
-        int seed = worldProvider.getSeed().hashCode();
-
+    	int seed = worldSeed.hashCode();
+    	
         float noiseMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * diversity;
 
         temperatureBaseField = new ConditionsBaseField(seaLevel, maxLevel, noiseMultiplier, function, seed + 582374);
@@ -69,7 +73,7 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
 
     public void configureHumidity(int seaLevel, int maxLevel, float diversity, Function<Float, Float> function,
                                   float minimumValue, float maximumValue) {
-        int seed = worldProvider.getSeed().hashCode();
+        int seed = worldSeed.hashCode();
 
         float noiseMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * diversity;
 
