@@ -61,8 +61,8 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
 
     public void configureTemperature(int seaLevel, int maxLevel, float diversity, Function<Float, Float> function,
                                      float minimumValue, float maximumValue) {
-    	int seed = worldSeed.hashCode();
-    	
+        int seed = worldSeed.hashCode();
+        
         float noiseMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * diversity;
 
         temperatureBaseField = new ConditionsBaseField(seaLevel, maxLevel, noiseMultiplier, function, seed + 582374);
