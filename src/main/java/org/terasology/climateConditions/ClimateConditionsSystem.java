@@ -20,10 +20,7 @@ import com.google.common.collect.Maps;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.world.WorldProvider;
 
 import java.util.Map;
 
@@ -113,5 +110,9 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
         }
 
         return value;
+    }
+
+    public String getWorldSeed() {
+        return worldSeed;
     }
 }

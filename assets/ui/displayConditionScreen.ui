@@ -1,0 +1,43 @@
+{
+    "type": "DisplayConditionScreen",
+    "contents": {
+        "type": "relativeLayout",
+        "contents": [
+            {
+                "type": "UIBox",
+                "layoutInfo": {
+                    "width": 400,
+                    "height": 400,
+                    "position-horizontal-center": {},
+                    "position-vertical-center": {}
+                },
+                "content": {
+                    "type": "relativeLayout",
+                    "contents": [
+                        {
+                            "type": "UILabel",
+                            "id": "mapName",
+                            "text": "Map",
+                            "layoutInfo": {
+                                "width": 300,
+                                "height": 20,
+                                "position-horizontal-center": {},
+                                "position-top": { }
+                            }
+                        },
+                        {
+                            "type": "ClimateMapWidget",
+                            "id": "climateMap",
+                            "layoutInfo": {
+                                "width": 300,
+                                "height": 300,
+                                "position-horizontal-center": {},
+                                "position-bottom": {}
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
