@@ -1,11 +1,10 @@
 {
     "id" : "ClimateConditions",
-    "version" : "0.1.2-SNAPSHOT",
+    "version" : "0.2.0",
     "author" : "Marcin Sciesinski <marcins78@gmail.com>",
     "displayName" : "Climate Conditions",
     "description" : "Module that introduces humidity and temperature fields and their modifiers",
-    "dependencies" : [
-        {"id" : "Core", "minVersion" : "3.0.0"}
-    ],
-    "isServerSideOnly" : true
+    "dependencies" : [],
+    "isServerSideOnly" : true,
+    "isLibrary": true
 }
