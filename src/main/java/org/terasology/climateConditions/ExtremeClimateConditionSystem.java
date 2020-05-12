@@ -118,7 +118,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
                     float height = location.getLocalPosition().getY();
                     //   float deltaHeight = location.getLastPosition().getY();
                     // float lastHeight = height - deltaHeight;
-                    if (height > 80) {
+                    if (height > thresholdHeight) {
                         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
                         entity.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
                     }
