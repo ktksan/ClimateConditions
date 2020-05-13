@@ -35,6 +35,7 @@ import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.health.event.ActivateRegenEvent;
 import org.terasology.logic.health.event.DeactivateRegenEvent;
 import org.terasology.logic.health.event.DoDamageEvent;
+import org.terasology.logic.location.Location;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
@@ -99,6 +100,19 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
                 movement.speedMultiplier = (float)0.7;
                 movement.jumpSpeed = (float)8;
                 player.send(new DeactivateRegenEvent());
+                //The following part adds snowParticleEffect
+
+                if (!player.hasComponent(SnowParticleComponent.class)) {
+                    EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
+                    LocationComponent targetLoc = player.getComponent(LocationComponent.class);
+                    LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
+                    childLoc.setWorldPosition(targetLoc.getWorldPosition());
+                    Location.attachChild(player, particleEntity);
+                    particleEntity.setOwner(player);
+                    player.addComponent(new SnowParticleComponent());
+                    player.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
+                }
+
             }
 
         if(height < thresholdHeight && lastHeight >= thresholdHeight) {
@@ -106,7 +120,14 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
                 movement.speedMultiplier = (float)1;
                 movement.jumpSpeed = (float)10;
                 player.send(new ActivateRegenEvent());
-            }
+                if (player.hasComponent(SnowParticleComponent.class)) {
+                    EntityRef particleEntity = player.getComponent(SnowParticleComponent.class).particleEntity;
+                    if (particleEntity != EntityRef.NULL) {
+                        particleEntity.destroy();
+                    }
+                    player.removeComponent(SnowParticleComponent.class);
+                }
+        }
     }
 
     @ReceiveEvent(components = {LocationComponent.class})
