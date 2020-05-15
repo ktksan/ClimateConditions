@@ -32,6 +32,7 @@ import org.terasology.logic.characters.CharacterMoveInputEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
+import org.terasology.logic.health.RegenComponent;
 import org.terasology.logic.health.event.ActivateRegenEvent;
 import org.terasology.logic.health.event.DeactivateRegenEvent;
 import org.terasology.logic.health.event.DoDamageEvent;
@@ -99,9 +100,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
                 movement.runFactor = 1;
                 movement.speedMultiplier = (float)0.7;
                 movement.jumpSpeed = (float)8;
-                player.send(new DeactivateRegenEvent());
                 //The following part adds snowParticleEffect
-
                 if (!player.hasComponent(SnowParticleComponent.class)) {
                     EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
                     LocationComponent targetLoc = player.getComponent(LocationComponent.class);
@@ -116,10 +115,10 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
             }
 
         if(height < thresholdHeight && lastHeight >= thresholdHeight) {
+                delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
                 movement.runFactor = (float)1.5;
                 movement.speedMultiplier = (float)1;
                 movement.jumpSpeed = (float)10;
-                player.send(new ActivateRegenEvent());
                 if (player.hasComponent(SnowParticleComponent.class)) {
                     EntityRef particleEntity = player.getComponent(SnowParticleComponent.class).particleEntity;
                     if (particleEntity != EntityRef.NULL) {
@@ -147,4 +146,11 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
         }
     }
 
+    @ReceiveEvent
+    public void onHealthRegen(ActivateRegenEvent event, EntityRef entity, LocationComponent location) {
+        float height = location.getLocalPosition().getY();
+        if(height > thresholdHeight){
+            entity.send(new DeactivateRegenEvent());
+        }
+    }
 }
