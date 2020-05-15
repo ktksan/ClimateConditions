@@ -64,9 +64,16 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     private Time time;
 
     private int healthDecreaseInterval = 20000;
-    private int healthDecreaseAmount = 10;
-    private float thresholdHeight= (float)80.0;
+    private int healthDecreaseAmount= 10;
+    private float thresholdHeight= (float)60;
+    private float defaultRunFactor;
+    private float defaultSpeedMultiplier;
+    private float defaultJumpSpeed;
+    private float reducedRunFactorMultiplier = (float)0.6;
+    private float reducedSpeedMultiplierMultiplier = (float)0.7;
+    private float reducedJumpSpeedMultiplier = (float)0.8;
     private Random random;
+
     /*
     NOTE: This part is for the desert effects and is incomplete.
 
@@ -97,9 +104,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
         float lastHeight = height - deltaHeight;
         if(height > thresholdHeight && lastHeight <= thresholdHeight) {
                 delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, 0, healthDecreaseInterval);
-                movement.runFactor = 1;
-                movement.speedMultiplier = (float)0.7;
-                movement.jumpSpeed = (float)8;
+                player.send(new ReduceSpeedEvent());
                 //The following part adds snowParticleEffect
                 if (!player.hasComponent(SnowParticleComponent.class)) {
                     EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
@@ -116,9 +121,8 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
 
         if(height < thresholdHeight && lastHeight >= thresholdHeight) {
                 delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
-                movement.runFactor = (float)1.5;
-                movement.speedMultiplier = (float)1;
-                movement.jumpSpeed = (float)10;
+                player.send(new ChangeSpeedToDefaultEvent());
+
                 if (player.hasComponent(SnowParticleComponent.class)) {
                     EntityRef particleEntity = player.getComponent(SnowParticleComponent.class).particleEntity;
                     if (particleEntity != EntityRef.NULL) {
@@ -147,10 +151,31 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     }
 
     @ReceiveEvent
-    public void onHealthRegen(ActivateRegenEvent event, EntityRef entity, LocationComponent location) {
+    public void onHealthRegen(ActivateRegenEvent event, EntityRef player, LocationComponent location) {
         float height = location.getLocalPosition().getY();
         if(height > thresholdHeight){
-            entity.send(new DeactivateRegenEvent());
+            player.send(new DeactivateRegenEvent());
         }
     }
+    @ReceiveEvent
+    public void OnPlayerSpawn(OnPlayerSpawnedEvent event, EntityRef player, CharacterMovementComponent movement) {
+        defaultRunFactor = movement.runFactor;;
+        defaultSpeedMultiplier = movement.speedMultiplier;
+        defaultJumpSpeed = movement.jumpSpeed;
+    }
+
+    @ReceiveEvent
+    public void OnSpeedReduce(ReduceSpeedEvent event, EntityRef player, CharacterMovementComponent movement){
+        movement.runFactor *= reducedRunFactorMultiplier;
+        movement.speedMultiplier *= reducedSpeedMultiplierMultiplier;
+        movement.jumpSpeed *= reducedJumpSpeedMultiplier;
+    }
+
+    @ReceiveEvent
+    public void OnChangeSpeedToDefault(ChangeSpeedToDefaultEvent event, EntityRef player, CharacterMovementComponent movement){
+        movement.runFactor /= reducedRunFactorMultiplier;
+        movement.speedMultiplier /= reducedSpeedMultiplierMultiplier;
+        movement.jumpSpeed /= reducedJumpSpeedMultiplier;
+    }
+
 }
