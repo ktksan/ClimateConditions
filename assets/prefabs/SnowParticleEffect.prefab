@@ -4,7 +4,7 @@
     "texture": "snow"
   },
   "positionRangeGenerator": {
-    "minPosition": [-1.0, -1.0, -1.0],
+    "minPosition": [0.0, 0.0, 0.0],
     "maxPosition": [ 1.0,  1.0,  1.0]
   },
   "energyRangeGenerator": {

@@ -21,6 +21,7 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
@@ -150,7 +151,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
         }
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL + 10 )
     public void onHealthRegen(ActivateRegenEvent event, EntityRef player, LocationComponent location) {
         float height = location.getLocalPosition().getY();
         if(height > thresholdHeight){
