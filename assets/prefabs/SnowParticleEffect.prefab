@@ -1,34 +1,32 @@
 {
   "location": {},
   "particleDataSprite": {
-    "texture": "snow"
+    "texture": "smoke"
   },
   "positionRangeGenerator": {
-    "minPosition": [0.0, 0.0, 0.0],
-    "maxPosition": [ 1.0,  1.0,  1.0]
-  },
+     "minPosition": [-0.5, 0.5, -0.5],
+     "maxPosition": [0.5,  0.6,  0.5]
+   },
   "energyRangeGenerator": {
-    "minEnergy": 0.75,
-    "maxEnergy": 1.50
+    "minEnergy": 1,
+    "maxEnergy": 2
   },
-  "accelerationAffector": {
-    "acceleration": [0, -5, 0]
+  "scaleRangeGenerator": {
+    "minScale": [1, 1, 1],
+    "maxScale": [1.5, 1.5, 1.5]
   },
   "velocityRangeGenerator": {
-    "minVelocity": [-2.0, 2.0, -2.0],
-    "maxVelocity": [ 2.0, 2.0,  2.0]
-  },
+    "minVelocity": [1, 0, 0],
+    "maxVelocity": [2, 0, 0]
+   },
   "velocityAffector": {},
-  "scaleRangeGenerator": {
-    "minScale": [0.05, 0.05, 0.05],
-    "maxScale": [0.15, 0.15, 0.15]
-  },
   "particleEmitter": {
-    "maxParticles": 64,
-    "spawnRateMin": 256,
-    "spawnRateMax": 512,
+    "spawnRateMax": 10,
+    "spawnRateMin": 10,
+    "particleSpawnsLeft": 10,
+    "maxParticles": 10,
     "particleCollision": false,
-    "destroyEntityWhenDead": false
+    "destroyEntityWhenDead": true
   },
   "snow": {}
 }
