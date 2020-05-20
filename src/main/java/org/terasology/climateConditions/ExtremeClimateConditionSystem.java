@@ -41,16 +41,20 @@ import org.terasology.logic.location.Location;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
+import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Vector3f;
+import org.terasology.particles.components.generators.VelocityRangeGeneratorComponent;
 import org.terasology.physics.events.ImpulseEvent;
 import org.terasology.physics.events.MovedEvent;
 import org.terasology.registry.In;
+/*
 import org.terasology.thirst.ThirstUtils;
 import org.terasology.thirst.component.ThirstComponent;
 import org.terasology.utilities.random.Random;
 
 import static org.terasology.logic.health.RegenAuthoritySystem.BASE_REGEN;
 import static org.terasology.thirst.ThirstAuthoritySystem.THIRST_DAMAGE_ACTION_ID;
-
+*/
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     public static final String FROSTBITE_DAMAGE_ACTION_ID = "Frostbite Damage";
@@ -73,7 +77,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     private float reducedRunFactorMultiplier = (float)0.6;
     private float reducedSpeedMultiplierMultiplier = (float)0.7;
     private float reducedJumpSpeedMultiplier = (float)0.8;
-    private Random random;
+
 
     /*
     NOTE: This part is for the desert effects and is incomplete.
@@ -98,25 +102,14 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
 */
 
     //The following part is for the Snow effects.
-    @ReceiveEvent(components = {PlayerCharacterComponent.class, ThirstComponent.class, CharacterMovementComponent.class})
-    public void ChangeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, ThirstComponent thirst, CharacterMovementComponent movement) {
+    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
+    public void ChangeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
         float height = event.getPosition().getY();
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
         if(height > thresholdHeight && lastHeight <= thresholdHeight) {
                 delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, 0, healthDecreaseInterval);
                 player.send(new ReduceSpeedEvent());
-                //The following part adds snowParticleEffect
-                if (!player.hasComponent(SnowParticleComponent.class)) {
-                    EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
-                    LocationComponent targetLoc = player.getComponent(LocationComponent.class);
-                    LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
-                    childLoc.setWorldPosition(targetLoc.getWorldPosition());
-                    Location.attachChild(player, particleEntity);
-                    particleEntity.setOwner(player);
-                    player.addComponent(new SnowParticleComponent());
-                    player.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
-                }
 
             }
 
@@ -146,6 +139,29 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
                     if (height > thresholdHeight) {
                         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
                         entity.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+
+                            EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
+                            LocationComponent targetLoc = entity.getComponent(LocationComponent.class);
+                            LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
+                            childLoc.setWorldPosition(targetLoc.getWorldPosition());
+                            Location.attachChild(entity, particleEntity);
+                            particleEntity.setOwner(entity);
+                            Vector3f direction = targetLoc.getLocalDirection();
+                            direction.normalize();
+
+                            //NOTE: initializing velocity using the constructor wasn't working hence the long method.
+                            //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
+                            VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
+                            direction.scale((float)0.5);
+                            direction.addY((float)0.5);
+                            velocity.minVelocity = direction;
+                            direction.scale((float)1.5);
+                            velocity.maxVelocity = direction;
+                            particleEntity.addOrSaveComponent(velocity);
+                            if(!entity.hasComponent(SnowParticleComponent.class)) {
+                                entity.addComponent(new SnowParticleComponent());
+                            }
+                            entity.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
                     }
             }
         }
