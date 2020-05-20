@@ -131,38 +131,38 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     public void onPeriodicActionTriggered(PeriodicActionTriggeredEvent event, EntityRef unusedEntity) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
             for (EntityRef entity : entityManager.getEntitiesWith(LocationComponent.class, AliveCharacterComponent.class)) {
-                // Check to see if health should be decreased
-                LocationComponent location = entity.getComponent(LocationComponent.class);
-                float height = location.getLocalPosition().getY();
-                //   float deltaHeight = location.getLastPosition().getY();
-                // float lastHeight = height - deltaHeight;
-                if (height > thresholdHeight) {
-                    Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
-                    entity.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+                    // Check to see if health should be decreased
+                    LocationComponent location = entity.getComponent(LocationComponent.class);
+                    float height = location.getLocalPosition().getY();
+                    //   float deltaHeight = location.getLastPosition().getY();
+                    // float lastHeight = height - deltaHeight;
+                    if (height > thresholdHeight) {
+                        Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
+                        entity.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
 
-                    EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
-                    LocationComponent targetLoc = entity.getComponent(LocationComponent.class);
-                    LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
-                    childLoc.setWorldPosition(targetLoc.getWorldPosition());
-                    Location.attachChild(entity, particleEntity);
-                    particleEntity.setOwner(entity);
-                    Vector3f direction = targetLoc.getLocalDirection();
-                    direction.normalize();
+                            EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
+                            LocationComponent targetLoc = entity.getComponent(LocationComponent.class);
+                            LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
+                            childLoc.setWorldPosition(targetLoc.getWorldPosition());
+                            Location.attachChild(entity, particleEntity);
+                            particleEntity.setOwner(entity);
+                            Vector3f direction = targetLoc.getLocalDirection();
+                            direction.normalize();
 
-                    //NOTE: initializing velocity using the constructor wasn't working hence the long method.
-                    //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
-                    VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
-                    direction.scale((float)0.5);
-                    direction.addY((float)0.5);
-                    velocity.minVelocity = direction;
-                    direction.scale((float)1.5);
-                    velocity.maxVelocity = direction;
-                    particleEntity.addOrSaveComponent(velocity);
-                    if(!entity.hasComponent(SnowParticleComponent.class)) {
-                        entity.addComponent(new SnowParticleComponent());
+                            //NOTE: initializing velocity using the constructor wasn't working hence the long method.
+                            //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
+                            VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
+                            direction.scale((float)0.5);
+                            direction.addY((float)0.5);
+                            velocity.minVelocity = direction;
+                            direction.scale((float)1.5);
+                            velocity.maxVelocity = direction;
+                            particleEntity.addOrSaveComponent(velocity);
+                            if(!entity.hasComponent(SnowParticleComponent.class)) {
+                                entity.addComponent(new SnowParticleComponent());
+                            }
+                            entity.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
                     }
-                    entity.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
-                }
             }
         }
     }
