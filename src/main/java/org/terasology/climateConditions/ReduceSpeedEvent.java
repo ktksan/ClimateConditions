@@ -20,7 +20,6 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.Event;
 import org.terasology.logic.common.ActivateEvent;
 
-/** This event is sent to an entity to indicate that it has drunk a drink. */
 public class ReduceSpeedEvent implements Event {
 
 }

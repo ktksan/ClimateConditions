@@ -56,8 +56,9 @@ import static org.terasology.logic.health.RegenAuthoritySystem.BASE_REGEN;
 import static org.terasology.thirst.ThirstAuthoritySystem.THIRST_DAMAGE_ACTION_ID;
 */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
-public class ExtremeClimateConditionSystem extends BaseComponentSystem{
+public class ExtremeClimateConditionSystem extends BaseComponentSystem {
     public static final String FROSTBITE_DAMAGE_ACTION_ID = "Frostbite Damage";
+    public static final String VISIBLE_BREATH_ACTION_ID = "Visible Breath";
 
     @In
     private EntityManager entityManager;
@@ -69,14 +70,16 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     private Time time;
 
     private int healthDecreaseInterval = 20000;
-    private int healthDecreaseAmount= 10;
-    private float thresholdHeight= (float)60;
+    private int initialDelay = 5000;
+    private int healthDecreaseAmount = 15;
+    private int breathInterval = 7000;
+    private float thresholdHeight = 60f;
     private float defaultRunFactor;
     private float defaultSpeedMultiplier;
     private float defaultJumpSpeed;
-    private float reducedRunFactorMultiplier = (float)0.6;
-    private float reducedSpeedMultiplierMultiplier = (float)0.7;
-    private float reducedJumpSpeedMultiplier = (float)0.8;
+    private float reducedRunFactorMultiplier = 0.6f;
+    private float reducedSpeedMultiplierMultiplier = 0.7f;
+    private float reducedJumpSpeedMultiplier = 0.8f;
 
 
     /*
@@ -101,98 +104,119 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem{
     }
 */
 
-    //The following part is for the Snow effects.
+    //The following part is for the Exreme Climate Effects (Snow biome).
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void ChangeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+    public void extremeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
         float height = event.getPosition().getY();
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
-        if(height > thresholdHeight && lastHeight <= thresholdHeight) {
-            delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, 0, healthDecreaseInterval);
+        if (height > thresholdHeight && lastHeight <= thresholdHeight) {
+            delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
+            delayManager.addPeriodicAction(player, VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
             player.send(new ReduceSpeedEvent());
-
         }
-
-        if(height < thresholdHeight && lastHeight >= thresholdHeight) {
+        if (height < thresholdHeight && lastHeight >= thresholdHeight) {
             delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
+            delayManager.cancelPeriodicAction(player, VISIBLE_BREATH_ACTION_ID);
             player.send(new ChangeSpeedToDefaultEvent());
-
-            if (player.hasComponent(SnowParticleComponent.class)) {
-                EntityRef particleEntity = player.getComponent(SnowParticleComponent.class).particleEntity;
+            if (player.hasComponent(VisibleBreathComponent.class)) {
+                EntityRef particleEntity = player.getComponent(VisibleBreathComponent.class).particleEntity;
                 if (particleEntity != EntityRef.NULL) {
                     particleEntity.destroy();
                 }
-                player.removeComponent(SnowParticleComponent.class);
+                player.removeComponent(VisibleBreathComponent.class);
             }
         }
     }
 
     @ReceiveEvent(components = {LocationComponent.class})
-    public void onPeriodicActionTriggered(PeriodicActionTriggeredEvent event, EntityRef unusedEntity) {
+    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
-            for (EntityRef entity : entityManager.getEntitiesWith(LocationComponent.class, AliveCharacterComponent.class)) {
-                    // Check to see if health should be decreased
-                    LocationComponent location = entity.getComponent(LocationComponent.class);
-                    float height = location.getLocalPosition().getY();
-                    //   float deltaHeight = location.getLastPosition().getY();
-                    // float lastHeight = height - deltaHeight;
-                    if (height > thresholdHeight) {
-                        Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
-                        entity.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+            // Check to see if health should be decreased
+            LocationComponent location = player.getComponent(LocationComponent.class);
+            float height = location.getLocalPosition().getY();
+            //   float deltaHeight = location.getLastPosition().getY();
+            // float lastHeight = height - deltaHeight;
+            if (height > thresholdHeight) {
+                applyFrostbiteDamagePlayer(player);
+            }
+        }
+    }
+    @ReceiveEvent(components = {LocationComponent.class})
+    public void onPeriodicBreath(PeriodicActionTriggeredEvent event, EntityRef player) {
+        if (event.getActionId().equals(VISIBLE_BREATH_ACTION_ID)) {
+            // Check to see if breath should be visible
+            LocationComponent location = player.getComponent(LocationComponent.class);
+            float height = location.getLocalPosition().getY();
+            if (height > thresholdHeight) {
+               updateVisibleBreathEffect(player);
 
-                            EntityRef particleEntity = entityManager.create("climateConditions:snowParticleEffect");
-                            LocationComponent targetLoc = entity.getComponent(LocationComponent.class);
-                            LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
-                            childLoc.setWorldPosition(targetLoc.getWorldPosition());
-                            Location.attachChild(entity, particleEntity);
-                            particleEntity.setOwner(entity);
-                            Vector3f direction = targetLoc.getLocalDirection();
-                            direction.normalize();
-
-                            //NOTE: initializing velocity using the constructor wasn't working hence the long method.
-                            //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
-                            VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
-                            direction.scale((float)0.5);
-                            direction.addY((float)0.5);
-                            velocity.minVelocity = direction;
-                            direction.scale((float)1.5);
-                            velocity.maxVelocity = direction;
-                            particleEntity.addOrSaveComponent(velocity);
-                            if(!entity.hasComponent(SnowParticleComponent.class)) {
-                                entity.addComponent(new SnowParticleComponent());
-                            }
-                            entity.getComponent(SnowParticleComponent.class).particleEntity = particleEntity;
-                    }
             }
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL + 10 )
+
+    @ReceiveEvent(priority = EventPriority.PRIORITY_NORMAL + 10)
     public void onHealthRegen(ActivateRegenEvent event, EntityRef player, LocationComponent location) {
         float height = location.getLocalPosition().getY();
-        if(height > thresholdHeight){
+        if (height > thresholdHeight) {
             player.send(new DeactivateRegenEvent());
         }
     }
-    @ReceiveEvent
-    public void OnPlayerSpawn(OnPlayerSpawnedEvent event, EntityRef player, CharacterMovementComponent movement) {
-        defaultRunFactor = movement.runFactor;;
-        defaultSpeedMultiplier = movement.speedMultiplier;
-        defaultJumpSpeed = movement.jumpSpeed;
+
+    public void getDefaultMovement(EntityRef player, CharacterMovementComponent movement) {
+        Prefab parentPrefab = player.getParentPrefab() ;
+        CharacterMovementComponent defaultMovement = parentPrefab.getComponent(CharacterMovementComponent.class);
+        defaultRunFactor = defaultMovement.runFactor;
+        defaultSpeedMultiplier = defaultMovement.speedMultiplier;
+        defaultJumpSpeed = defaultMovement.jumpSpeed;
     }
 
+
     @ReceiveEvent
-    public void OnSpeedReduce(ReduceSpeedEvent event, EntityRef player, CharacterMovementComponent movement){
+    public void onSpeedReduce(ReduceSpeedEvent event, EntityRef player, CharacterMovementComponent movement) {
         movement.runFactor *= reducedRunFactorMultiplier;
         movement.speedMultiplier *= reducedSpeedMultiplierMultiplier;
         movement.jumpSpeed *= reducedJumpSpeedMultiplier;
     }
 
     @ReceiveEvent
-    public void OnChangeSpeedToDefault(ChangeSpeedToDefaultEvent event, EntityRef player, CharacterMovementComponent movement){
+    public void onChangeSpeedToDefault(ChangeSpeedToDefaultEvent event, EntityRef player, CharacterMovementComponent movement) {
         movement.runFactor /= reducedRunFactorMultiplier;
         movement.speedMultiplier /= reducedSpeedMultiplierMultiplier;
         movement.jumpSpeed /= reducedJumpSpeedMultiplier;
+    }
+
+
+    private void applyFrostbiteDamagePlayer(EntityRef player)
+    {
+        Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
+        player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+    }
+
+    private void updateVisibleBreathEffect(EntityRef player) {
+        EntityRef particleEntity = entityManager.create("climateConditions:VisibleBreathEffect");
+        LocationComponent targetLoc = player.getComponent(LocationComponent.class);
+        LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
+        childLoc.setWorldPosition(targetLoc.getWorldPosition());
+        Location.attachChild(player, particleEntity);
+        particleEntity.setOwner(player);
+        Vector3f direction = targetLoc.getLocalDirection();
+        direction.normalize();
+
+        //NOTE: initializing velocity using the constructor wasn't working hence the long method.
+        //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
+        VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
+        direction.scale((float) 0.5);
+        direction.addY((float) 0.5);
+        velocity.minVelocity = direction;
+        direction.scale((float) 1.5);
+        velocity.maxVelocity = direction;
+        particleEntity.addOrSaveComponent(velocity);
+        if (!player.hasComponent(VisibleBreathComponent.class)) {
+            player.addComponent(new VisibleBreathComponent());
+        }
+        player.getComponent(VisibleBreathComponent.class).particleEntity = particleEntity;
     }
 
 }
