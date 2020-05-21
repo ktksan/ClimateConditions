@@ -15,8 +15,12 @@
  */
 package org.terasology.climateConditions;
 
+import org.terasology.alterationEffects.speed.StunAlterationEffect;
+import org.terasology.audio.StaticSound;
+import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.biomesAPI.OnBiomeChangedEvent;
+import org.terasology.context.Context;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -31,8 +35,10 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AliveCharacterComponent;
 import org.terasology.logic.characters.CharacterMoveInputEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
+import org.terasology.logic.characters.CharacterSoundComponent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
+import org.terasology.logic.health.DoDestroyEvent;
 import org.terasology.logic.health.RegenComponent;
 import org.terasology.logic.health.event.ActivateRegenEvent;
 import org.terasology.logic.health.event.DeactivateRegenEvent;
@@ -47,6 +53,9 @@ import org.terasology.particles.components.generators.VelocityRangeGeneratorComp
 import org.terasology.physics.events.ImpulseEvent;
 import org.terasology.physics.events.MovedEvent;
 import org.terasology.registry.In;
+import org.terasology.utilities.random.FastRandom;
+import org.terasology.utilities.random.Random;
+
 /*
 import org.terasology.thirst.ThirstUtils;
 import org.terasology.thirst.component.ThirstComponent;
@@ -68,6 +77,8 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
     private PrefabManager prefabManager;
     @In
     private Time time;
+    @In
+    private Context context;
 
     private int healthDecreaseInterval = 20000;
     private int initialDelay = 5000;
@@ -80,6 +91,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
     private float reducedRunFactorMultiplier = 0.6f;
     private float reducedSpeedMultiplierMultiplier = 0.7f;
     private float reducedJumpSpeedMultiplier = 0.8f;
+    private Random random = new FastRandom();
 
 
     /*
@@ -139,6 +151,9 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
             // float lastHeight = height - deltaHeight;
             if (height > thresholdHeight) {
                 applyFrostbiteDamagePlayer(player);
+                // Stun the player for 500 ms
+                applyStunEffect(player, 1000);
+                playFrostbiteSound(player);
             }
         }
     }
@@ -188,10 +203,25 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
     }
 
 
-    private void applyFrostbiteDamagePlayer(EntityRef player)
-    {
+    private void applyFrostbiteDamagePlayer(EntityRef player) {
         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
         player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+    }
+
+    private void applyStunEffect(EntityRef player, int duration) {
+        StunAlterationEffect stunAlterationEffect = new StunAlterationEffect(context);
+        //Both the instigator and the target is the player
+        //the magnitude parameter is not used by StunAlterationEffect
+        stunAlterationEffect.applyEffect(player, player, 0, duration);
+
+    }
+
+    public void playFrostbiteSound (EntityRef entity) {
+         CharacterSoundComponent characterSounds = entity.getComponent(CharacterSoundComponent.class);
+        if (characterSounds.deathSounds.size() > 0) {
+            StaticSound sound = random.nextItem(characterSounds.deathSounds);
+            entity.send(new PlaySoundEvent(entity, sound, characterSounds.deathVolume));
+        }
     }
 
     private void updateVisibleBreathEffect(EntityRef player) {
