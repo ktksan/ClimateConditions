@@ -15,7 +15,9 @@
  */
 package org.terasology.climateConditions;
 
+import org.terasology.alterationEffects.speed.JumpSpeedAlterationEffect;
 import org.terasology.alterationEffects.speed.StunAlterationEffect;
+import org.terasology.alterationEffects.speed.WalkSpeedAlterationEffect;
 import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.biomesAPI.Biome;
@@ -55,6 +57,8 @@ import org.terasology.physics.events.MovedEvent;
 import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
+
+import static org.terasology.alterationEffects.AlterationEffects.DURATION_INDEFINITE;
 
 /*
 import org.terasology.thirst.ThirstUtils;
@@ -116,7 +120,7 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
     }
 */
 
-    //The following part is for the Exreme Climate Effects (Snow biome).
+    //The following part is for the Extreme Climate Effects (Snow biome).
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void extremeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
         float height = event.getPosition().getY();
@@ -190,16 +194,20 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onSpeedReduce(ReduceSpeedEvent event, EntityRef player, CharacterMovementComponent movement) {
-        movement.runFactor *= reducedRunFactorMultiplier;
-        movement.speedMultiplier *= reducedSpeedMultiplierMultiplier;
-        movement.jumpSpeed *= reducedJumpSpeedMultiplier;
+       // movement.runFactor *= reducedRunFactorMultiplier;
+        //movement.speedMultiplier *= reducedSpeedMultiplierMultiplier;
+        //movement.jumpSpeed *= reducedJumpSpeedMultiplier;
+        WalkSpeedAlterationEffect reduceSpeed = new WalkSpeedAlterationEffect(context);
+        JumpSpeedAlterationEffect reduceJumpSpeed = new JumpSpeedAlterationEffect(context);
+        reduceSpeed.applyEffect(player,player,0.5f, DURATION_INDEFINITE);
+        reduceJumpSpeed.applyEffect(player,player,0.7f, DURATION_INDEFINITE);
     }
 
     @ReceiveEvent
     public void onChangeSpeedToDefault(ChangeSpeedToDefaultEvent event, EntityRef player, CharacterMovementComponent movement) {
-        movement.runFactor /= reducedRunFactorMultiplier;
-        movement.speedMultiplier /= reducedSpeedMultiplierMultiplier;
-        movement.jumpSpeed /= reducedJumpSpeedMultiplier;
+        movement.runFactor = 1.5f;                //= reducedRunFactorMultiplier;
+        movement.speedMultiplier = 1f;  //= reducedSpeedMultiplierMultiplier;
+        movement.jumpSpeed = 12f;   //= reducedJumpSpeedMultiplier;
     }
 
 
