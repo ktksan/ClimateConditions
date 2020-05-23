@@ -15,9 +15,8 @@
  */
 package org.terasology.climateConditions;
 
-import org.terasology.alterationEffects.speed.JumpSpeedAlterationEffect;
-import org.terasology.alterationEffects.speed.StunAlterationEffect;
-import org.terasology.alterationEffects.speed.WalkSpeedAlterationEffect;
+import org.terasology.alterationEffects.OnEffectModifyEvent;
+import org.terasology.alterationEffects.speed.*;
 import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.biomesAPI.Biome;
@@ -34,10 +33,7 @@ import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.characters.AliveCharacterComponent;
-import org.terasology.logic.characters.CharacterMoveInputEvent;
-import org.terasology.logic.characters.CharacterMovementComponent;
-import org.terasology.logic.characters.CharacterSoundComponent;
+import org.terasology.logic.characters.*;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.health.DoDestroyEvent;
@@ -59,6 +55,7 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 
 import static org.terasology.alterationEffects.AlterationEffects.DURATION_INDEFINITE;
+import static org.terasology.alterationEffects.AlterationEffects.WALK_SPEED;
 
 /*
 import org.terasology.thirst.ThirstUtils;
@@ -191,23 +188,34 @@ public class ExtremeClimateConditionSystem extends BaseComponentSystem {
         defaultJumpSpeed = defaultMovement.jumpSpeed;
     }
 
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
+    public void reduceSpeed(ReduceSpeedEvent event, EntityRef player){
+        if(!player.hasComponent(WalkSpeedComponent.class)) {
+            WalkSpeedComponent walkSpeed = (new WalkSpeedComponent());
+            player.addOrSaveComponent(walkSpeed);
+        }
+        WalkSpeedComponent walkSpeed = player.getComponent(WalkSpeedComponent.class);
+        walkSpeed.multiplier = 0.5f;
+        player.addOrSaveComponent(walkSpeed);
 
-    @ReceiveEvent
-    public void onSpeedReduce(ReduceSpeedEvent event, EntityRef player, CharacterMovementComponent movement) {
-       // movement.runFactor *= reducedRunFactorMultiplier;
-        //movement.speedMultiplier *= reducedSpeedMultiplierMultiplier;
-        //movement.jumpSpeed *= reducedJumpSpeedMultiplier;
-        WalkSpeedAlterationEffect reduceSpeed = new WalkSpeedAlterationEffect(context);
-        JumpSpeedAlterationEffect reduceJumpSpeed = new JumpSpeedAlterationEffect(context);
-        reduceSpeed.applyEffect(player,player,0.5f, DURATION_INDEFINITE);
-        reduceJumpSpeed.applyEffect(player,player,0.7f, DURATION_INDEFINITE);
+        if(!player.hasComponent(JumpSpeedComponent.class)) {
+            JumpSpeedComponent jumpSpeed = (new JumpSpeedComponent());
+            player.addOrSaveComponent(jumpSpeed);
+        }
+        JumpSpeedComponent jumpSpeed = player.getComponent(JumpSpeedComponent.class);
+        jumpSpeed.multiplier = 0.7f;
+        player.addOrSaveComponent(jumpSpeed);
     }
+
 
     @ReceiveEvent
     public void onChangeSpeedToDefault(ChangeSpeedToDefaultEvent event, EntityRef player, CharacterMovementComponent movement) {
-        movement.runFactor = 1.5f;                //= reducedRunFactorMultiplier;
-        movement.speedMultiplier = 1f;  //= reducedSpeedMultiplierMultiplier;
-        movement.jumpSpeed = 12f;   //= reducedJumpSpeedMultiplier;
+        if(player.hasComponent(WalkSpeedComponent.class)) {
+            player.removeComponent(WalkSpeedComponent.class);
+        }
+        if(player.hasComponent(JumpSpeedComponent.class)) {
+            player.removeComponent(JumpSpeedComponent.class);
+        }
     }
 
 
