@@ -27,6 +27,5 @@
     "maxParticles": 10,
     "particleCollision": false,
     "destroyEntityWhenDead": true
-  },
-  "snow": {}
+  }
 }

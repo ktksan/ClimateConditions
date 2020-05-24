@@ -16,7 +16,10 @@
 package org.terasology.climateConditions;
 
 import org.terasology.alterationEffects.OnEffectModifyEvent;
-import org.terasology.alterationEffects.speed.*;
+
+import org.terasology.alterationEffects.speed.JumpSpeedComponent;
+import org.terasology.alterationEffects.speed.StunAlterationEffect;
+import org.terasology.alterationEffects.speed.WalkSpeedComponent;
 import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.biomesAPI.Biome;
@@ -33,7 +36,9 @@ import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.characters.*;
+
+import org.terasology.logic.characters.CharacterMovementComponent;
+import org.terasology.logic.characters.CharacterSoundComponent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.health.DoDestroyEvent;
