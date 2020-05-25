@@ -15,5 +15,30 @@
  */
 package org.terasology.climateConditions;
 
-public class FrostbiteSystem {
+import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
+import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.characters.CharacterMovementComponent;
+import org.terasology.logic.location.LocationComponent;
+import org.terasology.logic.players.PlayerCharacterComponent;
+import org.terasology.physics.events.MovedEvent;
+
+@RegisterSystem(value = RegisterMode.AUTHORITY)
+public class FrostbiteSystem extends BaseComponentSystem {
+    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
+    public void extremeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+        float height = event.getPosition().getY();
+        float deltaHeight = event.getDelta().getY();
+        float lastHeight = height - deltaHeight;
+        if (height > thresholdHeight && lastHeight <= thresholdHeight) {
+
+            }
+        }
+        if (height < thresholdHeight && lastHeight >= thresholdHeight) {
+
+        }
+    }
+
 }
