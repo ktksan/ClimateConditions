@@ -15,5 +15,7 @@
  */
 package org.terasology.climateConditions;
 
-public class FrostbiteComponent {
+import org.terasology.entitySystem.Component;
+
+public class FrostbiteComponent implements Component {
 }

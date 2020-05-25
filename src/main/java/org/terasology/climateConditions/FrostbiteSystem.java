@@ -27,17 +27,22 @@ import org.terasology.physics.events.MovedEvent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class FrostbiteSystem extends BaseComponentSystem {
+    private float thresholdHeight = 60f;
+
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void extremeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
         float height = event.getPosition().getY();
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-
-            }
+                if(!player.hasComponent(FrostbiteComponent.class)){
+                    player.addOrSaveComponent(new FrostbiteComponent());
+                }
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-
+                if(player.hasComponent(FrostbiteComponent.class)){
+                    player.removeComponent(FrostbiteComponent.class);
+                }
         }
     }
 
