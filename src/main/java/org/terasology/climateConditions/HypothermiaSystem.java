@@ -47,13 +47,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
             }
         }
     }
-
-    @ReceiveEvent
-    public void onHypothermiaTriggered(HypothermiaTriggeredEvent event, EntityRef player){
-        if(player.hasComponent(HypothermiaComponent.class)){
-
-        }
-    }
     /*
     //Definition of danger zone undecided.
     @ReceiveEvent
@@ -66,4 +59,10 @@ public class HypothermiaSystem extends BaseComponentSystem {
     }
 
      */
+    @ReceiveEvent
+    public void onHypothermiaTriggered(HypothermiaTriggeredEvent event, EntityRef player){
+        if(player.hasComponent(HypothermiaComponent.class)){
+
+        }
+    }
 }
