@@ -32,6 +32,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void addHypothermia(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+        //TODO: react on OnBiomeChangedEvent to handle the danger zone
         float height = event.getPosition().getY();
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
