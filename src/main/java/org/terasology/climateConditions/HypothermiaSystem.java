@@ -47,16 +47,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
             }
         }
     }
-    /*
-    //Definition of danger zone undecided.
-    @ReceiveEvent
-    public void OnSnowBiomeEntered(OnBiomeChangedEvent event, EntityRef player){
-            if(event.getNewBiome().getDisplayName()=="Snow"){
-                if(!player.hasComponent(HypothermiaComponent.class)){
-                    player.addOrSaveComponent(new HypothermiaComponent());
-                }
-        }
-    }
 
      */
     @ReceiveEvent
