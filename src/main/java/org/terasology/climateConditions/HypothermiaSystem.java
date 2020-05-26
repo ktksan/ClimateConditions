@@ -53,13 +53,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia){
-        if(player.hasComponent(HypothermiaComponent.class)){
-
-        }
-    }
-
-    @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
         // If the entity is walking and they have a walk speed effect, boost their walking speed by the multiplier.
         if (event.getMovementMode() == MovementMode.WALKING && player.hasComponent(HypothermiaComponent.class)) {
