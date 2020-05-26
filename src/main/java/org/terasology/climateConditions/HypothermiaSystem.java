@@ -37,9 +37,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-                if(!player.hasComponent(HypothermiaComponent.class)){
-                    player.addOrSaveComponent(new HypothermiaComponent());
-                }
+                player.addOrSaveComponent(new HypothermiaComponent());
                 player.send(new HypothermiaTriggeredEvent());
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
