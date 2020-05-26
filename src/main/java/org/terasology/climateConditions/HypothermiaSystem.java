@@ -28,7 +28,7 @@ import org.terasology.physics.events.MovedEvent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
-    private float thresholdHeight = 10000f;
+    private float thresholdHeight = 60f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void addHypothermia(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
@@ -39,6 +39,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
                 if(!player.hasComponent(HypothermiaComponent.class)){
                     player.addOrSaveComponent(new HypothermiaComponent());
                 }
+                player.send(new HypothermiaTriggeredEvent());
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
             if(player.hasComponent(HypothermiaComponent.class)){
@@ -46,6 +47,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
             }
         }
     }
+    /*
+    //Definition of danger zone undecided.
     @ReceiveEvent
     public void OnSnowBiomeEntered(OnBiomeChangedEvent event, EntityRef player){
             if(event.getNewBiome().getDisplayName()=="Snow"){
@@ -54,6 +57,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
                 }
         }
     }
+
+     */
 }
-
-
