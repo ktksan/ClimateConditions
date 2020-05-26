@@ -15,6 +15,7 @@
  */
 package org.terasology.climateConditions;
 
+import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -26,24 +27,33 @@ import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
-public class FrostbiteSystem extends BaseComponentSystem {
-    private float thresholdHeight = 60f;
+public class HypothermiaSystem extends BaseComponentSystem {
+    private float thresholdHeight = 10000f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void extremeSnowEffect(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+    public void addHypothermia(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
         float height = event.getPosition().getY();
         float deltaHeight = event.getDelta().getY();
         float lastHeight = height - deltaHeight;
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-                if(!player.hasComponent(FrostbiteComponent.class)){
-                    player.addOrSaveComponent(new FrostbiteComponent());
+                if(!player.hasComponent(HypothermiaComponent.class)){
+                    player.addOrSaveComponent(new HypothermiaComponent());
                 }
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-                if(player.hasComponent(FrostbiteComponent.class)){
-                    player.removeComponent(FrostbiteComponent.class);
+            if(player.hasComponent(HypothermiaComponent.class)){
+                player.removeComponent(HypothermiaComponent.class);
+            }
+        }
+    }
+    @ReceiveEvent
+    public void OnSnowBiomeEntered(OnBiomeChangedEvent event, EntityRef player){
+            if(event.getNewBiome().getDisplayName()=="Snow"){
+                if(!player.hasComponent(HypothermiaComponent.class)){
+                    player.addOrSaveComponent(new HypothermiaComponent());
                 }
         }
     }
-
 }
+
+

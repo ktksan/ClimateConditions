@@ -17,5 +17,5 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.Component;
 
-public class FrostbiteComponent implements Component {
+public class HypothermiaComponent implements Component {
 }
