@@ -98,8 +98,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
             // Check to see if health should be decreased
             LocationComponent location = player.getComponent(LocationComponent.class);
             float height = location.getLocalPosition().getY();
-            //   float deltaHeight = location.getLastPosition().getY();
-            // float lastHeight = height - deltaHeight;
             if (height > thresholdHeight) {
                 applyFrostbiteDamagePlayer(player);
                 // Stun the player for 500 ms
