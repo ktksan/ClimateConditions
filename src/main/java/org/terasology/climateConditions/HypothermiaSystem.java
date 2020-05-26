@@ -45,11 +45,4 @@ public class HypothermiaSystem extends BaseComponentSystem {
             }
         }
     }
-
-    @ReceiveEvent
-    public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia){
-        if(player.hasComponent(HypothermiaComponent.class)){
-
-        }
-    }
 }
