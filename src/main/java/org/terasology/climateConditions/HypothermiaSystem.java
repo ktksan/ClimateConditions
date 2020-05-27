@@ -15,10 +15,7 @@
  */
 package org.terasology.climateConditions;
 
-import org.terasology.alterationEffects.speed.*;
-import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -66,5 +63,4 @@ public class HypothermiaSystem extends BaseComponentSystem {
             event.multiply(JumpSpeedMultiplier);
         }
     }
-
 }
