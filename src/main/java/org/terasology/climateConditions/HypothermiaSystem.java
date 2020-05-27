@@ -23,7 +23,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.delay.DelayManager;
-import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 import org.terasology.registry.In;
@@ -41,7 +40,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
     private int breathInterval = 7000;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void observeDangerZone(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+    public void observeDangerZone(MovedEvent event, EntityRef player) {
         //TODO: react on OnBiomeChangedEvent to handle the danger zone
         float height = event.getPosition().getY();
         float lastHeight = height - event.getDelta().getY();
