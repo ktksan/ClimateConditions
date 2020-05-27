@@ -18,7 +18,6 @@ package org.terasology.climateConditions;
 import org.terasology.alterationEffects.speed.StunAlterationEffect;
 import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
-import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.context.Context;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
@@ -51,52 +50,48 @@ public class HypothermiaSystem extends BaseComponentSystem {
     @In
     private Context context;
 
-    private float thresholdHeight = 60f;
-    private int healthDecreaseInterval = 20000;
-    private int initialDelay = 5000;
-    private int healthDecreaseAmount = 15;
+    private static final float thresholdHeight = 60f;
+    private static final int healthDecreaseInterval = 20000;
+    private static final int initialDelay = 5000;
+    private static final int healthDecreaseAmount = 15;
     private Random random = new FastRandom();
 
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
-        //TODO: react on OnBiomeChangedEvent to handle the danger zone
+        //TODO: react on OnBiomeChangedEvent to handle the danger zone1
         float height = event.getPosition().getY();
         float lastHeight = height - event.getDelta().getY();
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
             player.addOrSaveComponent(new HypothermiaComponent());
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-            if(player.hasComponent(HypothermiaComponent.class)){
+            if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
+                delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
             }
         }
     }
 
-    @ReceiveEvent
-    public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia){
-        if(player.hasComponent(HypothermiaComponent.class)){
-            delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
-        }
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void onHypothermia(OnAddedComponent event, EntityRef player) {
+        delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
     }
-    @ReceiveEvent(components = {LocationComponent.class})
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
     public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
-            // Check to see if health should be decreased
-            LocationComponent location = player.getComponent(LocationComponent.class);
-            float height = location.getLocalPosition().getY();
-            if (height > thresholdHeight) {
-                applyFrostbiteDamagePlayer(player);
-                // Stun the player for 500 ms
-                applyStunEffect(player, 1000);
-                playFrostbiteSound(player);
-            }
+            applyFrostbiteDamagePlayer(player);
+            applyStunEffect(player, 1000);
+            playFrostbiteSound(player);
         }
     }
+
     private void applyFrostbiteDamagePlayer(EntityRef player) {
         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
         player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
     }
+
     private void applyStunEffect(EntityRef player, int duration) {
         StunAlterationEffect stunAlterationEffect = new StunAlterationEffect(context);
         //Both the instigator and the target is the player
@@ -104,6 +99,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
         stunAlterationEffect.applyEffect(player, player, 0, duration);
 
     }
+
     public void playFrostbiteSound (EntityRef entity) {
         CharacterSoundComponent characterSounds = entity.getComponent(CharacterSoundComponent.class);
         if (characterSounds.deathSounds.size() > 0) {
