@@ -21,7 +21,6 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.CharacterMovementComponent;
-import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 
@@ -30,15 +29,15 @@ public class HypothermiaSystem extends BaseComponentSystem {
     private float thresholdHeight = 60f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void observeDangerZone(MovedEvent event, EntityRef player, LocationComponent location, CharacterMovementComponent movement) {
+    public void observeDangerZone(MovedEvent event, EntityRef player) {
         //TODO: react on OnBiomeChangedEvent to handle the danger zone
         float height = event.getPosition().getY();
         float lastHeight = height - event.getDelta().getY();
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-                player.addOrSaveComponent(new HypothermiaComponent());
+            player.addOrSaveComponent(new HypothermiaComponent());
         }
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-            if(player.hasComponent(HypothermiaComponent.class)){
+            if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
             }
         }
