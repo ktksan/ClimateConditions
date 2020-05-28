@@ -21,7 +21,10 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
+import org.terasology.logic.characters.GetMaxSpeedEvent;
+import org.terasology.logic.characters.MovementMode;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
@@ -38,6 +41,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
     private float thresholdHeight = 60f;
     private int initialDelay = 5000;
     private int breathInterval = 7000;
+    private float walkSpeedMultiplier = 0.6f;
+    private float jumpSpeedMultiplier = 0.7f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player) {
@@ -58,5 +63,17 @@ public class HypothermiaSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia) {
         delayManager.addPeriodicAction(player, VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
+        if (event.getMovementMode() == MovementMode.WALKING) {
+            event.multiply(walkSpeedMultiplier);
+        }
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
+        event.multiply(jumpSpeedMultiplier);
     }
 }
