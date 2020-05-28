@@ -99,7 +99,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
 
     }
 
-    public void playFrostbiteSound (EntityRef entity) {
+    public void playFrostbiteSound(EntityRef entity) {
         CharacterSoundComponent characterSounds = entity.getComponent(CharacterSoundComponent.class);
         if (characterSounds.deathSounds.size() > 0) {
             StaticSound sound = random.nextItem(characterSounds.deathSounds);
