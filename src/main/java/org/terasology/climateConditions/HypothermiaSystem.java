@@ -16,6 +16,7 @@
 package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -29,8 +30,6 @@ import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 import org.terasology.registry.In;
-
-import static org.terasology.climateConditions.VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
@@ -55,14 +54,18 @@ public class HypothermiaSystem extends BaseComponentSystem {
         if (height < thresholdHeight && lastHeight >= thresholdHeight) {
             if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
-                delayManager.cancelPeriodicAction(player, VISIBLE_BREATH_ACTION_ID);
             }
         }
     }
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia) {
-        delayManager.addPeriodicAction(player, VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+    }
+
+    @ReceiveEvent(components = HypothermiaComponent.class)
+    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player, HypothermiaComponent hypothermia) {
+        delayManager.cancelPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID);
     }
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
