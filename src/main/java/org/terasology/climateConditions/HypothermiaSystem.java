@@ -58,7 +58,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player) {
-        //TODO: react on OnBiomeChangedEvent to handle the danger zone1
+        //TODO: react on OnBiomeChangedEvent to handle the danger zone
         float height = event.getPosition().getY();
         float lastHeight = height - event.getDelta().getY();
         if (height > thresholdHeight && lastHeight <= thresholdHeight) {
@@ -106,5 +106,4 @@ public class HypothermiaSystem extends BaseComponentSystem {
             entity.send(new PlaySoundEvent(entity, sound, characterSounds.deathVolume));
         }
     }
-
 }
