@@ -27,8 +27,7 @@ import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.characters.CharacterMovementComponent;
-import org.terasology.logic.characters.CharacterSoundComponent;
+import org.terasology.logic.characters.*;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.health.event.DoDamageEvent;
@@ -53,8 +52,9 @@ public class HypothermiaSystem extends BaseComponentSystem {
     private static final int healthDecreaseInterval = 20000;
     private static final int initialDelay = 5000;
     private static final int healthDecreaseAmount = 15;
+    private float walkSpeedMultiplier = 0.6f;
+    private float jumpSpeedMultiplier = 0.7f;
     private Random random = new FastRandom();
-
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player) {
@@ -86,6 +86,18 @@ public class HypothermiaSystem extends BaseComponentSystem {
         }
     }
 
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
+        if (event.getMovementMode() == MovementMode.WALKING) {
+            event.multiply(walkSpeedMultiplier);
+        }
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
+        event.multiply(jumpSpeedMultiplier);
+    }
+
     private void applyFrostbiteDamagePlayer(EntityRef player) {
         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
         player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
@@ -96,7 +108,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
         //Both the instigator and the target is the player
         //the magnitude parameter is not used by StunAlterationEffect
         stunAlterationEffect.applyEffect(player, player, 0, duration);
-
     }
 
     public void playFrostbiteSound(EntityRef entity) {
