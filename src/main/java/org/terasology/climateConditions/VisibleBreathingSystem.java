@@ -71,16 +71,19 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
         direction.normalize();
         //NOTE: initializing velocity using the constructor wasn't working hence the long method.
         //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
-        VelocityRangeGeneratorComponent velocity = particleEntity.getComponent(VelocityRangeGeneratorComponent.class);
-        direction.scale(0.5f);
-        direction.addY(0.5f);
-        velocity.minVelocity = direction;
-        direction.scale(1.5f);
-        velocity.maxVelocity = direction;
-        particleEntity.addOrSaveComponent(velocity);
-        if (!player.hasComponent(VisibleBreathComponent.class)) {
-            player.addComponent(new VisibleBreathComponent());
-        }
-        player.getComponent(VisibleBreathComponent.class).particleEntity = particleEntity;
+        particleEntity.upsertComponent((VelocityRangeGeneratorComponent.class), maybeComponent -> {
+            VelocityRangeGeneratorComponent velocity = maybeComponent.orElse(new VelocityRangeGeneratorComponent());
+            direction.scale(0.5f);
+            direction.addY(0.5f);
+            velocity.minVelocity = direction;
+            direction.scale(1.5f);
+            velocity.maxVelocity = direction;
+            return velocity;
+        });
+        player.upsertComponent((VisibleBreathComponent.class), maybeComponent -> {
+            VisibleBreathComponent component = maybeComponent.orElse(new VisibleBreathComponent());
+            component.particleEntity = particleEntity;
+            return component;
+		});
     }
 }
