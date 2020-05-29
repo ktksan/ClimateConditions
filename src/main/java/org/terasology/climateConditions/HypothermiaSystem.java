@@ -48,7 +48,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
         if (event.getMovementMode() == MovementMode.WALKING) {
             event.multiply(walkSpeedMultiplier);
