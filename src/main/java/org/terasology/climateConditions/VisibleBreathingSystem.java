@@ -17,10 +17,13 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.location.Location;
 import org.terasology.logic.location.LocationComponent;
@@ -34,17 +37,32 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
+    @In
+    private DelayManager delayManager;
+
+    private int initialDelay = 5000;
+    private int breathInterval = 7000;
+
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onPeriodicBreath(PeriodicActionTriggeredEvent event, EntityRef player) {
+    public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia) {
+        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+    }
+
+    @ReceiveEvent(components = HypothermiaComponent.class)
+    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player, HypothermiaComponent hypothermia) {
+        delayManager.cancelPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID);
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void onPeriodicBreath(PeriodicActionTriggeredEvent event, EntityRef player, LocationComponent location) {
         if (event.getActionId().equals(VISIBLE_BREATH_ACTION_ID)) {
-            updateVisibleBreathEffect(player);
+            updateVisibleBreathEffect(player, location);
         }
     }
 
-    private void updateVisibleBreathEffect(EntityRef player) {
+    private void updateVisibleBreathEffect(EntityRef player, LocationComponent targetLoc) {
         EntityRef particleEntity = entityManager.create("climateConditions:VisibleBreathEffect");
-        LocationComponent targetLoc = player.getComponent(LocationComponent.class);
         LocationComponent childLoc = particleEntity.getComponent(LocationComponent.class);
         childLoc.setWorldPosition(targetLoc.getWorldPosition());
         Location.attachChild(player, particleEntity);
