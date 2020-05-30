@@ -4,7 +4,10 @@
     "author": "Marcin Sciesinski <marcins78@gmail.com>",
     "displayName": "Climate Conditions",
     "description": "Module that introduces humidity and temperature fields and their modifiers",
-    "dependencies": [],
+    "dependencies": [
+                        {"id": "BiomesAPI", "minVersion": "4.0.0"},
+                        {"id": "Thirst", "minVersion": "1.0.0"}
+                    ],
     "isServerSideOnly": true,
     "isLibrary": true,
     "isAugmentation": true
