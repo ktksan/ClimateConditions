@@ -58,7 +58,7 @@ public class FrostbiteSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player, HypothermiaComponent hypothermia) {
+    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
         delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
     }
 
