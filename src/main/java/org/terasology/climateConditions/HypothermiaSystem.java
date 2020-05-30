@@ -29,7 +29,7 @@ import org.terasology.physics.events.MovedEvent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
-    private float thresholdHeight = 60f;
+    private final float thresholdHeight = 60f;
     private float walkSpeedMultiplier = 0.6f;
     private float jumpSpeedMultiplier = 0.7f;
 
