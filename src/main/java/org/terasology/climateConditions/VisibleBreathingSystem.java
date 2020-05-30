@@ -45,12 +45,13 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
 
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onHypothermia(OnAddedComponent event, EntityRef player, HypothermiaComponent hypothermia) {
-        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+    public void onHypothermia(OnAddedComponent event, EntityRef player) {
+        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay,
+                breathInterval);
     }
 
     @ReceiveEvent(components = HypothermiaComponent.class)
-    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player, HypothermiaComponent hypothermia) {
+    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
         delayManager.cancelPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID);
     }
 
@@ -69,8 +70,6 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
         particleEntity.setOwner(player);
         Vector3f direction = targetLoc.getLocalDirection();
         direction.normalize();
-        //NOTE: initializing velocity using the constructor wasn't working hence the long method.
-        //particleEntity.addComponent(new VelocityRangeGeneratorComponent(direction,direction.scale(2)));
         particleEntity.upsertComponent((VelocityRangeGeneratorComponent.class), maybeComponent -> {
             VelocityRangeGeneratorComponent velocity = maybeComponent.orElse(new VelocityRangeGeneratorComponent());
             direction.scale(0.5f);
@@ -84,6 +83,6 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
             VisibleBreathComponent component = maybeComponent.orElse(new VisibleBreathComponent());
             component.particleEntity = particleEntity;
             return component;
-		});
+        });
     }
 }
