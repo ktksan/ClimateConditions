@@ -50,8 +50,7 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void onHypothermia(OnAddedComponent event, EntityRef player) {
-        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay,
-                breathInterval);
+        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
     }
 
     @ReceiveEvent(components = HypothermiaComponent.class)
