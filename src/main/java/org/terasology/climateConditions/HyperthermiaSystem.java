@@ -42,9 +42,10 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player, ThirstComponent thirst) {
-            String a = "A";
-            thirst.normalDecayPerSecond = 3f;
-
+            if(event.getNewBiome().getDisplayName().equals("DESERT")) {
+                thirst.normalDecayPerSecond = 3f;
+            }
+//            String A = "a";
     }
 
     @ReceiveEvent
