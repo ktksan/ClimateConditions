@@ -31,6 +31,10 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.particles.components.generators.VelocityRangeGeneratorComponent;
 import org.terasology.registry.In;
 
+/**
+ * This system is responsible for giving the player a visible breath using particle effects as long as the player has a
+ * hypothermia component.
+ */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class VisibleBreathingSystem extends BaseComponentSystem {
     public static final String VISIBLE_BREATH_ACTION_ID = "Visible Breath";

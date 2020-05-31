@@ -27,6 +27,11 @@ import org.terasology.logic.characters.MovementMode;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 
+/**
+ * This system is responsible for adding a Hypothermia Component to the player whenever a player enters the danger
+ * zone(extreme cold climate). And also for modifying the speed of the player as long as the player has a Hypothermia
+ * Component.
+ */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
     private final float thresholdHeight = 60f;
@@ -48,6 +53,9 @@ public class HypothermiaSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Modifies the walking/running speed of player as long as the player has a Hypothermia Component.
+     */
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
         if (event.getMovementMode() == MovementMode.WALKING) {
@@ -55,6 +63,9 @@ public class HypothermiaSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Modifies the jump speed of player as long as the player has a Hypothermia Component.
+     */
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
         event.multiply(jumpSpeedMultiplier);
