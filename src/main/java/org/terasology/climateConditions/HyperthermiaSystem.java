@@ -28,30 +28,18 @@ import org.terasology.thirst.component.ThirstComponent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
-    private float walkSpeedMultiplier = 0.6f;
-    private float jumpSpeedMultiplier = 0.7f;
-/*
-    @ReceiveEvent
-    public void modifySpeed2(GetMaxSpeedEvent event, EntityRef player, ThirstComponent thirst) {
-        if (event.getMovementMode() == MovementMode.WALKING) {
-            event.multiply(1.2f);
-            thirst.normalDecayPerSecond = 3f;
-        }
-    }
-
 
     @ReceiveEvent
     public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player, ThirstComponent thirst) {
             if(event.getNewBiome().getDisplayName().equals("DESERT")) {
                 thirst.normalDecayPerSecond = 3f;
+                player.addOrSaveComponent(new HyperthermiaComponent());
+                String A = "a";
             }
-//            String A = "a";
     }
 
-   // @ReceiveEvent
-    //public void modifyJumpSpeed2(AffectJumpForceEvent event, EntityRef player) {
-      //  event.multiply(0.8f);
-    //}
-
- */
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player){
+        event.multiply(4f);
+    }
 }
