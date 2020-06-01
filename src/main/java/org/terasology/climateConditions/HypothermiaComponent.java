@@ -17,5 +17,8 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * This component is added by the authority when a player enters the danger zone (extreme cold climate).
+ */
 public class HypothermiaComponent implements Component {
 }
