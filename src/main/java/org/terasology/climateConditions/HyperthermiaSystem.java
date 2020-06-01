@@ -30,7 +30,7 @@ import org.terasology.thirst.component.ThirstComponent;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.6f;
     private float jumpSpeedMultiplier = 0.7f;
-
+/*
     @ReceiveEvent
     public void modifySpeed2(GetMaxSpeedEvent event, EntityRef player, ThirstComponent thirst) {
         if (event.getMovementMode() == MovementMode.WALKING) {
@@ -48,8 +48,10 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 //            String A = "a";
     }
 
-    @ReceiveEvent
-    public void modifyJumpSpeed2(AffectJumpForceEvent event, EntityRef player) {
-        event.multiply(0.8f);
-    }
+   // @ReceiveEvent
+    //public void modifyJumpSpeed2(AffectJumpForceEvent event, EntityRef player) {
+      //  event.multiply(0.8f);
+    //}
+
+ */
 }
