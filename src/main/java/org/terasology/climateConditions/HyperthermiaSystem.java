@@ -16,9 +16,10 @@
 package org.terasology.climateConditions;
 
 import org.terasology.biomesAPI.Biome;
-import org.terasology.biomesAPI.BiomeManager;
+import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -39,7 +40,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
 
     @In
-    BiomeManager biomeManager;
+    BiomeRegistry biomeRegistry;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player, ThirstComponent thirst) {
@@ -57,11 +58,12 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         event.multiply(walkSpeedMultiplier);
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_HIGH)
     public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
-        final Optional<Biome> biome = biomeManager.getBiome(new Vector3i(location.getLocalPosition()));
+        final Optional<Biome> biome = biomeRegistry.getBiome(new Vector3i(location.getLocalPosition()));
         if (biome.get().getDisplayName().equals("Desert")) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         }
     }
+
 }
