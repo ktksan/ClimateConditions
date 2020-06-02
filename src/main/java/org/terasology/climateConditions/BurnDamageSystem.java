@@ -27,6 +27,8 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
+import org.terasology.logic.health.event.ActivateRegenEvent;
+import org.terasology.logic.health.event.DeactivateRegenEvent;
 import org.terasology.logic.health.event.DoDamageEvent;
 import org.terasology.registry.In;
 
@@ -60,6 +62,11 @@ public class BurnDamageSystem extends BaseComponentSystem {
         if (event.getActionId().equals(BURN_DAMAGE_ACTION_ID)) {
             applyBurnDamagePlayer(player);
         }
+    }
+
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
+    public void onHealthRegen(ActivateRegenEvent event, EntityRef entity) {
+        entity.send(new DeactivateRegenEvent());
     }
 
     private void applyBurnDamagePlayer(EntityRef player) {

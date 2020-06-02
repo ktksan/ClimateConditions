@@ -31,6 +31,8 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.CharacterSoundComponent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
+import org.terasology.logic.health.event.ActivateRegenEvent;
+import org.terasology.logic.health.event.DeactivateRegenEvent;
 import org.terasology.logic.health.event.DoDamageEvent;
 import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
@@ -73,6 +75,11 @@ public class FrostbiteSystem extends BaseComponentSystem {
             applyStunEffect(player, 1000);
             playFrostbiteSound(player);
         }
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void onHealthRegen(ActivateRegenEvent event, EntityRef entity) {
+        entity.send(new DeactivateRegenEvent());
     }
 
     private void applyFrostbiteDamagePlayer(EntityRef player) {
