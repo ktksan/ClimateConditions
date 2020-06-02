@@ -29,6 +29,7 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.registry.In;
 import org.terasology.thirst.component.ThirstComponent;
 
 import java.util.Optional;
@@ -36,6 +37,8 @@ import java.util.Optional;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
+
+    @In
     BiomeManager biomeManager;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
@@ -54,7 +57,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         event.multiply(walkSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
+    @ReceiveEvent
     public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
         final Optional<Biome> biome = biomeManager.getBiome(new Vector3i(location.getLocalPosition()));
         if (biome.get().getDisplayName().equals("Desert")) {
