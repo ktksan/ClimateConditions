@@ -56,14 +56,14 @@ public class BurnDamageSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player) {
+    public void onPeriodicBurn(PeriodicActionTriggeredEvent event, EntityRef player) {
         if (event.getActionId().equals(BURN_DAMAGE_ACTION_ID)) {
             applyBurnDamagePlayer(player);
         }
     }
 
     private void applyBurnDamagePlayer(EntityRef player) {
-        Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
-        player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
+        Prefab burnDamagePrefab = prefabManager.getPrefab("ClimateConditions:BurnDamage");
+        player.send(new DoDamageEvent(healthDecreaseAmount, burnDamagePrefab));
     }
 }
