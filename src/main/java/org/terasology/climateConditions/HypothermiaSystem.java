@@ -28,9 +28,8 @@ import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.physics.events.MovedEvent;
 
 /**
- * This system is responsible for adding a Hypothermia Component to the player whenever a player enters the danger
- * zone(extreme cold climate). And also for modifying the speed of the player as long as the player has a Hypothermia
- * Component.
+ * Adds a {@link HypothermiaComponent} to the player.
+ * Hypothermia occurs in locations with extremely cold climate and, e.g., slows the player's movements.
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
