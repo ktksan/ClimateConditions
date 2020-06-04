@@ -23,6 +23,7 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.location.LocationComponent;
@@ -37,6 +38,7 @@ import java.util.Optional;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
+    private float jumpSpeedMultiplier = 0.85f;
 
     @In
     BiomeRegistry biomeRegistry;
@@ -55,6 +57,11 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
         event.multiply(walkSpeedMultiplier);
+    }
+
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
+        event.multiply(jumpSpeedMultiplier);
     }
 
     @ReceiveEvent
