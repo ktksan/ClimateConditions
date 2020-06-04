@@ -53,7 +53,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Modifies the walking/running speed of player as long as the player has a Hypothermia Component.
+     * Modifies the walking/running speed of the player.
+     * Is only active iff the player has a {@link HypothermiaComponent}.
      */
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
