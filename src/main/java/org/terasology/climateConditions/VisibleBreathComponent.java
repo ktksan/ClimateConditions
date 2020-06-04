@@ -4,8 +4,8 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 
 /**
- * This component is added to the player entity when the player enters the danger zone. Gives a visible breath to the
- * player using particle effects.
+ * Augments the world with a visible breath particle effect.
+ * Is added/updated by the {@link VisibleBreathingSystem} periodically.
  */
 public class VisibleBreathComponent implements Component {
     public EntityRef particleEntity = EntityRef.NULL;
