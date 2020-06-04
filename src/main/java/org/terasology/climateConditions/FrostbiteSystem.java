@@ -37,8 +37,9 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 
 /**
- * This system is responsible for periodic frostbite damage (along with stun and a sound effect) to the player as long
- * as the player has a Hypothermia component.
+ * Adds frostbite to the player.
+ * Frostbite is a periodic effect that, e.g., damages and stuns the player.
+ * Is only active iff the player has a {@link HypothermiaComponent}.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FrostbiteSystem extends BaseComponentSystem {
