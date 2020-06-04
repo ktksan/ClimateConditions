@@ -64,7 +64,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Modifies the jump speed of player as long as the player has a Hypothermia Component.
+     * Modifies the jump speed of the player.
+     * Is only active iff the player has a {@link HypothermiaComponent}.
      */
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
