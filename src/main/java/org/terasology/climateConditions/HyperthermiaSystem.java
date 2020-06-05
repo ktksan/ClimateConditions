@@ -30,8 +30,8 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
 import org.terasology.registry.In;
-import org.terasology.thirst.component.ThirstComponent;
 
 import java.util.Optional;
 
@@ -39,13 +39,14 @@ import java.util.Optional;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
+    private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
     BiomeRegistry biomeRegistry;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player, ThirstComponent thirst) {
-        if (event.getNewBiome().getDisplayName().equals("Desert")) {
+    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player) {
+        if (event.getNewBiome().getId().equals(DesertId)) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         } else {
             if (player.hasComponent(HyperthermiaComponent.class)) {
@@ -67,7 +68,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
         final Optional<Biome> biome = biomeRegistry.getBiome(new Vector3i(location.getLocalPosition()));
-        if (biome.get().getDisplayName().equals("Desert")) {
+        if (biome.get().getId().equals(DesertId)) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         }
     }
