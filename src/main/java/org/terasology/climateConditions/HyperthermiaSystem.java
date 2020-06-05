@@ -31,7 +31,6 @@ import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
-import org.terasology.thirst.component.ThirstComponent;
 
 import java.util.Optional;
 
@@ -44,7 +43,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     BiomeRegistry biomeRegistry;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player, ThirstComponent thirst) {
+    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player) {
         if (event.getNewBiome().getDisplayName().equals("Desert")) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         } else {
