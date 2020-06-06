@@ -16,25 +16,26 @@
 
 package org.terasology.climateConditions;
 
-import org.terasology.alterationEffects.damageOverTime.DamageOverTimeComponent;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.chat.ChatMessageEvent;
+import org.terasology.logic.delay.DelayManager;
+import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.players.PlayerCharacterComponent;
+import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.world.generation.GeneratingRegion;
 
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
-public class TemperatureSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class TemperatureSystem extends BaseComponentSystem {
     @In
     BiomeRegistry biomeRegistry;
     @In
@@ -47,53 +48,52 @@ public class TemperatureSystem extends BaseComponentSystem implements UpdateSubs
     private EntityManager entityManager;
     @In
     ClimateConditionsSystem climateConditionsSystem;
+    @In
+    DelayManager delayManager;
 
-    /**
-     * Integer storing when to check each effect.
-     */
-    private static final int CHECK_INTERVAL = 10000;
+    private static final int CHECK_INTERVAL = 1000;
 
-    /**
-     * Integer storing when to apply DOT damage
-     */
-    private static final int DAMAGE_TICK = 10000;
+    private static final int DISPLAY_INTERVAL = 10000;
 
-    /**
-     * Last time the list of DOT effects were checked.
-     */
-    private long lastUpdated;
 
-    @Override
-    public void update(float delta) {
-        final long currentTime = time.getGameTimeInMs();
+    private float bodyTemperature;
 
-        // If the current time passes the CHECK_INTERVAL threshold, continue.
-        if (currentTime >= lastUpdated + CHECK_INTERVAL) {
-            // Set the lastUpdated time to be the currentTime.
-            lastUpdated = currentTime;
+    private float lastBodyTemperature;
 
-            // For every entity with the health and DOT components, check to see if they have passed a DAMAGE_TICK. If
-            // so, apply a heal event to the applicable entities with the given damageAmount.
-            for (EntityRef entity : entityManager.getEntitiesWith(PlayerCharacterComponent.class)) {
-                final DamageOverTimeComponent component = entity.getComponent(DamageOverTimeComponent.class);
-                final LocationComponent location = entity.getComponent(LocationComponent.class);
-                float temp = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
-                        location.getLocalPosition().getY(), location.getLocalPosition().getZ());
-                entity.getOwner().send(new ChatMessageEvent("temp: " + temp, entity.getOwner()));
+    public static final String BODY_TEMPERATURE_UPDATE_ACTION_ID = "Body Temperature Update";
 
-            }
+    public static final String BODY_TEMPERATURE_DISPLAY_ACTION_ID = "Body Temperature Display";
+
+    @ReceiveEvent
+    public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player) {
+        bodyTemperature = 0.4f;
+        lastBodyTemperature = 0.4f;
+        delayManager.addPeriodicAction(player, BODY_TEMPERATURE_UPDATE_ACTION_ID, 0, CHECK_INTERVAL);
+        delayManager.addPeriodicAction(player, BODY_TEMPERATURE_DISPLAY_ACTION_ID, 0, DISPLAY_INTERVAL);
+
+    }
+
+    @ReceiveEvent
+    public void onTemperatureUpdate(PeriodicActionTriggeredEvent event, EntityRef player, LocationComponent location) {
+        if (event.getActionId().equals(BODY_TEMPERATURE_UPDATE_ACTION_ID)) {
+            float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
+                    location.getLocalPosition().getY(), location.getLocalPosition().getZ());
+            float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition().getX(),
+                    location.getLocalPosition().getY(), location.getLocalPosition().getZ());
+            bodyTemperature =
+                    lastBodyTemperature + ((((envTemperature - (envHumidity / 10)) - lastBodyTemperature) / 100000) * CHECK_INTERVAL);
+            lastBodyTemperature = bodyTemperature;
         }
     }
-/*
-    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void changeBiome(OnBiomeChangedEvent event, EntityRef player, LocationComponent location) {
-        float temp = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),location
-        .getLocalPosition().getY(),location.getLocalPosition().getZ());
-        player.getOwner().send(new ChatMessageEvent("temp: " + temp, player.getOwner()));
+
+    @ReceiveEvent
+    public void onTemperatureDisplay(PeriodicActionTriggeredEvent event, EntityRef player, LocationComponent location) {
+        if (event.getActionId().equals(BODY_TEMPERATURE_DISPLAY_ACTION_ID)) {
+            float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
+                    location.getLocalPosition().getY(), location.getLocalPosition().getZ());
+            player.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature, player.getOwner()));
+            player.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, player.getOwner()));
+        }
 
     }
-
-
- */
-
 }
