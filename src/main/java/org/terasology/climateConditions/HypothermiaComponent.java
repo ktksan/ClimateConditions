@@ -17,5 +17,9 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * Increases the game difficulty in locations with extreme cold climate.
+ * Is added/removed by the {@link HypothermiaSystem} when the player enters/leaves a "danger zone".
+ */
 public class HypothermiaComponent implements Component {
 }
