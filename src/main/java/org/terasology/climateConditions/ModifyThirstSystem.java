@@ -30,8 +30,8 @@ public class ModifyThirstSystem extends BaseComponentSystem {
     private float defaultSprintDecayPerSecond;
 
     @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void onAddedHypothermia(OnAddedComponent event, EntityRef player, ThirstComponent thirst) {
-        scaleThrist(player, thirst, 2f);
+    public void onAddedHyperthermia(OnAddedComponent event, EntityRef player, ThirstComponent thirst) {
+        scaleThirst(player, thirst, 2f);
     }
 
     @ReceiveEvent(components = {HyperthermiaComponent.class})
@@ -43,7 +43,7 @@ public class ModifyThirstSystem extends BaseComponentSystem {
     }
 
 
-    public void scaleThrist(EntityRef player, ThirstComponent thirst, float magnitude) {
+    public void scaleThirst(EntityRef player, ThirstComponent thirst, float magnitude) {
         thirst.normalDecayPerSecond *= magnitude;
         thirst.sprintDecayPerSecond *= magnitude;
         player.saveComponent(thirst);

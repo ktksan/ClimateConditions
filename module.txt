@@ -7,12 +7,8 @@
     "dependencies": [
             { "id": "AlterationEffects","minVersion": "1.0.0"},
             { "id": "BiomesAPI", "minVersion": "4.0.0"},
-<<<<<<< HEAD
             { "id": "Health", "minVersion": "1.0.0" },
             { "id": "Thirst", "minVersion": "1.0.0"}
-=======
-            { "id": "Health", "minVersion": "1.0.0" }
->>>>>>> e5ad36e97159dc138bd6cc4c1cfdd6f13f6f411e
         ],
     "isServerSideOnly": true,
     "isLibrary": true,
