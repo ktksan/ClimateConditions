@@ -40,6 +40,7 @@ import java.util.Optional;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
+    private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -68,7 +69,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifyThirst(AffectThirstEvent event, EntityRef player) {
-        event.multiply(2f);
+        event.multiply(thirstMultiplier);
     }
 
     @ReceiveEvent
