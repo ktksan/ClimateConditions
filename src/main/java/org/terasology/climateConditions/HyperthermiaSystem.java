@@ -15,6 +15,9 @@
  */
 package org.terasology.climateConditions;
 
+import org.terasology.biomesAPI.Biome;
+import org.terasology.biomesAPI.BiomeRegistry;
+import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -23,52 +26,51 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
-import org.terasology.logic.characters.MovementMode;
+import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
-import org.terasology.physics.events.MovedEvent;
+import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
+import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
+import org.terasology.registry.In;
 
-/**
- * Adds a {@link HypothermiaComponent} to the player.
- * Hypothermia occurs in locations with extremely cold climate and, e.g., slows the player's movements.
- */
+import java.util.Optional;
+
 @RegisterSystem(value = RegisterMode.AUTHORITY)
-public class HypothermiaSystem extends BaseComponentSystem {
-    private final float thresholdHeight = 60f;
-    private float walkSpeedMultiplier = 0.6f;
-    private float jumpSpeedMultiplier = 0.7f;
+public class HyperthermiaSystem extends BaseComponentSystem {
+    private float walkSpeedMultiplier = 0.7f;
+    private float jumpSpeedMultiplier = 0.85f;
+    private final Name DesertId = new Name("CoreWorlds:Desert");
+
+    @In
+    BiomeRegistry biomeRegistry;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void observeDangerZone(MovedEvent event, EntityRef player) {
-        //TODO: react on OnBiomeChangedEvent to handle the danger zone
-        float height = event.getPosition().getY();
-        float lastHeight = height - event.getDelta().getY();
-        if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-            player.addOrSaveComponent(new HypothermiaComponent());
-        }
-        if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-            if (player.hasComponent(HypothermiaComponent.class)) {
-                player.removeComponent(HypothermiaComponent.class);
+    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player) {
+        if (event.getNewBiome().getId().equals(DesertId)) {
+            player.addOrSaveComponent(new HyperthermiaComponent());
+        } else {
+            if (player.hasComponent(HyperthermiaComponent.class)) {
+                player.removeComponent(HyperthermiaComponent.class);
             }
         }
     }
 
-    /**
-     * Reduces the walking/running speed of the player.
-     * Is only active iff the player has a {@link HypothermiaComponent}.
-     */
-    @ReceiveEvent(components = {HypothermiaComponent.class})
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
-        if (event.getMovementMode() == MovementMode.WALKING) {
-            event.multiply(walkSpeedMultiplier);
-        }
+        event.multiply(walkSpeedMultiplier);
     }
 
-    /**
-     * Reduces the jump speed of the player.
-     * Is only active iff the player has a {@link HypothermiaComponent}.
-     */
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
         event.multiply(jumpSpeedMultiplier);
     }
+
+    @ReceiveEvent
+    public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
+        final Optional<Biome> biome = biomeRegistry.getBiome(new Vector3i(location.getLocalPosition()));
+        if (biome.get().getId().equals(DesertId)) {
+            player.addOrSaveComponent(new HyperthermiaComponent());
+        }
+    }
+
 }

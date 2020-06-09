@@ -31,6 +31,11 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.particles.components.generators.VelocityRangeGeneratorComponent;
 import org.terasology.registry.In;
 
+/**
+ * Adds a {@link VisibleBreathComponent} to the player.
+ * Visible breath is a periodic action adding a visible breath particle effect.
+ * Is active only iff the player has a {@link HypothermiaComponent}
+ */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class VisibleBreathingSystem extends BaseComponentSystem {
     public static final String VISIBLE_BREATH_ACTION_ID = "Visible Breath";
@@ -46,7 +51,8 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void onHypothermia(OnAddedComponent event, EntityRef player) {
-        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay, breathInterval);
+        delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay,
+                breathInterval);
     }
 
     @ReceiveEvent(components = HypothermiaComponent.class)
