@@ -60,7 +60,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         event.multiply(walkSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
         event.multiply(jumpSpeedMultiplier);
     }
