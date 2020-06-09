@@ -32,6 +32,7 @@ import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.In;
+import org.terasology.thirst.event.AffectThirstEvent;
 
 import java.util.Optional;
 
@@ -63,6 +64,11 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {HypothermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
         event.multiply(jumpSpeedMultiplier);
+    }
+
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
+    public void modifyThirst(AffectThirstEvent event, EntityRef player) {
+        event.multiply(2f);
     }
 
     @ReceiveEvent
