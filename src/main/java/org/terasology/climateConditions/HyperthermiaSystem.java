@@ -81,7 +81,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         removePlayerWeakness(player, health);
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifyThirst(AffectThirstEvent event, EntityRef player) {
         event.multiply(thirstMultiplier);
     }
