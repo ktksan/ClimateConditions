@@ -35,6 +35,7 @@ import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.In;
+import org.terasology.thirst.event.AffectThirstEvent;
 
 import java.util.Optional;
 
@@ -43,6 +44,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
     private float healthReduceFactor = 0.8f;
+    private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -79,6 +81,10 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         removePlayerWeakness(player, health);
     }
 
+    public void modifyThirst(AffectThirstEvent event, EntityRef player) {
+        event.multiply(thirstMultiplier);
+    }
+
     @ReceiveEvent
     public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
         final Optional<Biome> biome = biomeRegistry.getBiome(new Vector3i(location.getLocalPosition()));
@@ -94,7 +100,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         player.saveComponent(health);
     }
 
-    private void removePlayerWeakness(EntityRef player, HealthComponent health) {   
+    private void removePlayerWeakness(EntityRef player, HealthComponent health) {
         health.maxHealth /= healthReduceFactor;
         health.currentHealth /= healthReduceFactor;
         health.regenRate /= healthReduceFactor;
