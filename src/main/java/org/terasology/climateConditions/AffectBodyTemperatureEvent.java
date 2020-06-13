@@ -20,7 +20,7 @@ import org.terasology.entitySystem.event.AbstractValueModifiableEvent;
 
 /**
  * This event is sent out by the {@link BodyTemperatureSystem} to allow for other systems to
- * modify change in body temperature.
+ * modify the change in body temperature.
  */
 public class AffectBodyTemperatureEvent extends AbstractValueModifiableEvent {
     public AffectBodyTemperatureEvent(float baseValue) {

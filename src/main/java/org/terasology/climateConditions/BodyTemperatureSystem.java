@@ -73,10 +73,12 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition().getX(),
                         location.getLocalPosition().getY(), location.getLocalPosition().getZ());
                 deltaTemp = ((((envTemperature - (envHumidity / 10)) - btc.bodyTemperature) / 100000) * CHECK_INTERVAL);
+                /*
                 //Send event for other systems to modify change in body temperature.
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
                 entity.send(affectBodyTemperatureEvent);
                 deltaTemp = affectBodyTemperatureEvent.getResultValue();
+                 */
                 btc.bodyTemperature = btc.bodyTemperature + deltaTemp;
                 //Check for change in body temperature levels.
                 if ((btc.bodyTemperature < 0.3) && (btc.bodyTemperature - deltaTemp > 0.3)) {
