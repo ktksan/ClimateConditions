@@ -32,6 +32,7 @@ import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.In;
+import org.terasology.thirst.event.AffectThirstEvent;
 
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ import java.util.Optional;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
+    private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -63,6 +65,11 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
         event.multiply(jumpSpeedMultiplier);
+    }
+
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
+    public void modifyThirst(AffectThirstEvent event, EntityRef player) {
+        event.multiply(thirstMultiplier);
     }
 
     @ReceiveEvent
