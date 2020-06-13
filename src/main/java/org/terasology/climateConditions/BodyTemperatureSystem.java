@@ -29,7 +29,6 @@ import org.terasology.logic.chat.ChatMessageEvent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
 import org.terasology.registry.In;
 import org.terasology.world.WorldComponent;
 
@@ -37,7 +36,6 @@ import org.terasology.world.WorldComponent;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class BodyTemperatureSystem extends BaseComponentSystem {
     public static final String BODY_TEMPERATURE_UPDATE_ACTION_ID = "Body Temperature Update";
-    public static final String BODY_TEMPERATURE_DISPLAY_ACTION_ID = "Body Temperature Display";
 
     private static final Logger logger = LoggerFactory.getLogger(BodyTemperatureSystem.class);
 
@@ -49,7 +47,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     DelayManager delayManager;
 
     private static final int CHECK_INTERVAL = 1000;
-    private static final int DISPLAY_INTERVAL = 10000;
+    private float deltaTemp;
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -69,39 +67,61 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
         if (event.getActionId().equals(BODY_TEMPERATURE_UPDATE_ACTION_ID)) {
             for (EntityRef entity : entityManager.getEntitiesWith(AliveCharacterComponent.class)) {
                 LocationComponent location = entity.getComponent(LocationComponent.class);
-                if (!entity.hasComponent(BodyTemperatureComponent.class)) {
-                    BodyTemperatureComponent btc = new BodyTemperatureComponent();
-                    entity.addComponent(btc);
-                }
                 BodyTemperatureComponent btc = entity.getComponent(BodyTemperatureComponent.class);
                 float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
                         location.getLocalPosition().getY(), location.getLocalPosition().getZ());
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition().getX(),
                         location.getLocalPosition().getY(), location.getLocalPosition().getZ());
-                btc.bodyTemperature =
-                        btc.lastBodyTemperature + ((((envTemperature - (envHumidity / 10)) - btc.lastBodyTemperature) / 100000) * CHECK_INTERVAL);
-                btc.lastBodyTemperature = btc.bodyTemperature;
+                deltaTemp = ((((envTemperature - (envHumidity / 10)) - btc.bodyTemperature) / 100000) * CHECK_INTERVAL);
+                //Send event for other systems to modify change in body temperature.
+                AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
+                entity.send(affectBodyTemperatureEvent);
+                deltaTemp = affectBodyTemperatureEvent.getResultValue();
+                btc.bodyTemperature = btc.bodyTemperature + deltaTemp;
+                //Check for change in body temperature levels.
+                if ((btc.bodyTemperature < 0.3) && (btc.bodyTemperature - deltaTemp > 0.3)) {
+                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW));
+                }
+                if ((btc.bodyTemperature > 0.3) && (btc.bodyTemperature - deltaTemp < 0.3)) {
+                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL));
+                }
+                if ((btc.bodyTemperature > 0.6) && (btc.bodyTemperature - deltaTemp < 0.6)) {
+                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW));
+                }
+                if ((btc.bodyTemperature < 0.6) && (btc.bodyTemperature - deltaTemp > 0.6)) {
+                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL));
+                }
+                entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + btc.bodyTemperature,
+                        entity.getOwner()));
+                entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, entity.getOwner()));
                 entity.saveComponent(btc);
             }
         }
     }
 
     @ReceiveEvent
-    public void onTemperatureDisplay(PeriodicActionTriggeredEvent event, EntityRef player, LocationComponent location
-            , BodyTemperatureComponent btc) {
-        // temporary: for help in development
-        if (event.getActionId().equals(BODY_TEMPERATURE_DISPLAY_ACTION_ID)) {
-            float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
-                    location.getLocalPosition().getY(), location.getLocalPosition().getZ());
-            player.getOwner().send(new ChatMessageEvent("Body Temperature: " + btc.bodyTemperature, player.getOwner()));
-            player.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, player.getOwner()));
+    public void onTemperatureChangedToHigh(BodyTemperatureChangedEvent event, EntityRef player) {
+        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.HIGH) {
+            player.addOrSaveComponent(new HyperthermiaComponent());
         }
-
     }
 
     @ReceiveEvent
-    public void onPlayerSpawn(OnPlayerSpawnedEvent event, EntityRef player) {
-        delayManager.addPeriodicAction(player, BODY_TEMPERATURE_DISPLAY_ACTION_ID, 0, DISPLAY_INTERVAL);
-        // temporary: for help in development
+    public void onTemperatureChangedToLow(BodyTemperatureChangedEvent event, EntityRef player) {
+        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW) {
+            player.addOrSaveComponent(new HypothermiaComponent());
+        }
+    }
+
+    @ReceiveEvent
+    public void onTemperatureChangedToNormal(BodyTemperatureChangedEvent event, EntityRef player) {
+        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL) {
+            if(player.hasComponent(HyperthermiaComponent.class)) {
+                player.removeComponent(HyperthermiaComponent.class);
+            }
+            if(player.hasComponent(HypothermiaComponent.class)) {
+                player.removeComponent(HypothermiaComponent.class);
+            }
+        }
     }
 }

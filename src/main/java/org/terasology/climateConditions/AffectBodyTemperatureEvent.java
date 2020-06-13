@@ -16,11 +16,15 @@
 
 package org.terasology.climateConditions;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.network.Replicate;
+import org.terasology.entitySystem.event.AbstractValueModifiableEvent;
 
-public class BodyTemperatureComponent implements Component {
-
-    @Replicate
-    public float bodyTemperature = 0.4f;
+/**
+ * This event is sent out by the {@link BodyTemperatureSystem} to allow for other systems to
+ * modify change in body temperature.
+ */
+public class AffectBodyTemperatureEvent extends AbstractValueModifiableEvent {
+    public AffectBodyTemperatureEvent(float baseValue) {
+        super(baseValue);
+    }
 }
+

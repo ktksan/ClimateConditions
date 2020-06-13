@@ -16,11 +16,20 @@
 
 package org.terasology.climateConditions;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.network.Replicate;
+import org.terasology.entitySystem.event.Event;
 
-public class BodyTemperatureComponent implements Component {
+public class BodyTemperatureChangedEvent implements Event {
+    public enum BodyTemperatureLevel {
+        CRITICAL_LOW, LOW, REDUCED, NORMAL, RAISED, HIGH, CRITICAL_HIGH;
+    }
 
-    @Replicate
-    public float bodyTemperature = 0.4f;
+    private BodyTemperatureLevel bodyTemperatureLevel;
+
+    public BodyTemperatureChangedEvent(BodyTemperatureLevel bodyTemperatureLevel) {
+        this.bodyTemperatureLevel = bodyTemperatureLevel;
+    }
+
+    public BodyTemperatureLevel getBodyTemperatureLevel(){
+        return  bodyTemperatureLevel;
+    }
 }
