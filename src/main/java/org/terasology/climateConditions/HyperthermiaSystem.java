@@ -96,14 +96,13 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 
     private void weakenPlayer(EntityRef player, HealthComponent health) {
         health.maxHealth *= healthReduceFactor;
-        health.currentHealth *= healthReduceFactor;
+        health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
         health.regenRate *= healthReduceFactor;
         player.saveComponent(health);
     }
 
     private void removePlayerWeakness(EntityRef player, HealthComponent health) {
         health.maxHealth /= healthReduceFactor;
-        health.currentHealth /= healthReduceFactor;
         health.regenRate /= healthReduceFactor;
         player.saveComponent(health);
     }
