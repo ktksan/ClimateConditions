@@ -29,6 +29,7 @@ import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.health.HealthComponent;
+import org.terasology.logic.health.event.ChangeMaxHealthEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
@@ -43,7 +44,8 @@ import java.util.Optional;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
-    private float healthReduceFactor = 0.8f;
+    private float regenReduceFactor = 0.8f;
+    private int newMaxHealth = 80;
     private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
@@ -95,15 +97,15 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     private void weakenPlayer(EntityRef player, HealthComponent health) {
-        health.maxHealth *= healthReduceFactor;
+        player.send(new ChangeMaxHealthEvent(newMaxHealth));
         health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
-        health.regenRate *= healthReduceFactor;
+        health.regenRate *= regenReduceFactor;
         player.saveComponent(health);
     }
 
     private void removePlayerWeakness(EntityRef player, HealthComponent health) {
-        health.maxHealth /= healthReduceFactor;
-        health.regenRate /= healthReduceFactor;
+        player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
+        health.regenRate /= regenReduceFactor;
         player.saveComponent(health);
     }
 }
