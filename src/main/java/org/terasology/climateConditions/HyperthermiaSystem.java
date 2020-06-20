@@ -29,6 +29,7 @@ import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.health.HealthComponent;
+import org.terasology.logic.health.event.ActivateRegenEvent;
 import org.terasology.logic.health.event.ChangeMaxHealthEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
@@ -105,6 +106,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 
     private void removePlayerWeakness(EntityRef player, HealthComponent health) {
         player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
+        player.send(new ActivateRegenEvent());
         health.regenRate /= regenReduceFactor;
         player.saveComponent(health);
     }
