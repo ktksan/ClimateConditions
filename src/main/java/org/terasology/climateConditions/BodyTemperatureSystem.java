@@ -89,6 +89,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 }
                 //Update current body temperature.
                 bodyTemperature.current = bodyTemperature.current + deltaTemp;
+                //only for development purposes
                 entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
                         entity.getOwner()));
                 entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, entity.getOwner()));
