@@ -47,7 +47,6 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     DelayManager delayManager;
 
     private static final int CHECK_INTERVAL = 1000;
-    private float deltaTemp;
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -65,65 +64,73 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onTemperatureUpdate(PeriodicActionTriggeredEvent event, EntityRef world) {
         if (event.getActionId().equals(BODY_TEMPERATURE_UPDATE_ACTION_ID)) {
-            for (EntityRef entity : entityManager.getEntitiesWith(AliveCharacterComponent.class)) {
+            for (EntityRef entity : entityManager.getEntitiesWith(AliveCharacterComponent.class,
+                    BodyTemperatureComponent.class, LocationComponent.class)) {
                 LocationComponent location = entity.getComponent(LocationComponent.class);
-                BodyTemperatureComponent btc = entity.getComponent(BodyTemperatureComponent.class);
+                BodyTemperatureComponent bodyTemperature = entity.getComponent(BodyTemperatureComponent.class);
                 float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
                         location.getLocalPosition().getY(), location.getLocalPosition().getZ());
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition().getX(),
                         location.getLocalPosition().getY(), location.getLocalPosition().getZ());
-                deltaTemp = ((((envTemperature - (envHumidity / 10)) - btc.bodyTemperature) / 100000) * CHECK_INTERVAL);
+                float deltaTemp =
+                        ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
                 /*
                 //Send event for other systems to modify change in body temperature.
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
                 entity.send(affectBodyTemperatureEvent);
                 deltaTemp = affectBodyTemperatureEvent.getResultValue();
                  */
-                btc.bodyTemperature = btc.bodyTemperature + deltaTemp;
                 //Check for change in body temperature levels.
-                if ((btc.bodyTemperature < 0.3) && (btc.bodyTemperature - deltaTemp > 0.3)) {
-                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW));
+                BodyTemperatureLevel before = lookupLevel(bodyTemperature.current);
+                BodyTemperatureLevel after = lookupLevel(bodyTemperature.current + deltaTemp);
+                if (before != after) {
+                    entity.send(new BodyTemperatureChangedEvent(before, after));
+                    bodyTemperature.currentLevel = after;
                 }
-                if ((btc.bodyTemperature > 0.3) && (btc.bodyTemperature - deltaTemp < 0.3)) {
-                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL));
-                }
-                if ((btc.bodyTemperature > 0.6) && (btc.bodyTemperature - deltaTemp < 0.6)) {
-                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW));
-                }
-                if ((btc.bodyTemperature < 0.6) && (btc.bodyTemperature - deltaTemp > 0.6)) {
-                    entity.send(new BodyTemperatureChangedEvent(BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL));
-                }
-                entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + btc.bodyTemperature,
+                //Update current body temperature.
+                bodyTemperature.current = bodyTemperature.current + deltaTemp;
+                entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
                         entity.getOwner()));
                 entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, entity.getOwner()));
-                entity.saveComponent(btc);
+                entity.saveComponent(bodyTemperature);
             }
         }
     }
 
     @ReceiveEvent
     public void onTemperatureChangedToHigh(BodyTemperatureChangedEvent event, EntityRef player) {
-        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.HIGH) {
+        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.HIGH) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         }
     }
 
     @ReceiveEvent
     public void onTemperatureChangedToLow(BodyTemperatureChangedEvent event, EntityRef player) {
-        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.LOW) {
+        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.LOW) {
             player.addOrSaveComponent(new HypothermiaComponent());
         }
     }
 
     @ReceiveEvent
     public void onTemperatureChangedToNormal(BodyTemperatureChangedEvent event, EntityRef player) {
-        if(event.getBodyTemperatureLevel() == BodyTemperatureChangedEvent.BodyTemperatureLevel.NORMAL) {
-            if(player.hasComponent(HyperthermiaComponent.class)) {
+        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.NORMAL) {
+            if (player.hasComponent(HyperthermiaComponent.class)) {
                 player.removeComponent(HyperthermiaComponent.class);
             }
-            if(player.hasComponent(HypothermiaComponent.class)) {
+            if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
             }
+        }
+    }
+
+    public BodyTemperatureLevel lookupLevel(float temperature) {
+        if (temperature <= 0.3) {
+            return BodyTemperatureLevel.LOW;
+        } else if (temperature <= 0.6) {
+            return BodyTemperatureLevel.NORMAL;
+        } else
+        {
+            return BodyTemperatureLevel.HIGH;
         }
     }
 }

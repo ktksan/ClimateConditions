@@ -19,17 +19,20 @@ package org.terasology.climateConditions;
 import org.terasology.entitySystem.event.Event;
 
 public class BodyTemperatureChangedEvent implements Event {
-    public enum BodyTemperatureLevel {
-        CRITICAL_LOW, LOW, REDUCED, NORMAL, RAISED, HIGH, CRITICAL_HIGH;
+    private BodyTemperatureLevel oldLevel;
+    private BodyTemperatureLevel newLevel;
+
+
+    public BodyTemperatureChangedEvent(BodyTemperatureLevel oldLevel, BodyTemperatureLevel newLevel) {
+        this.oldLevel = oldLevel;
+        this.newLevel = newLevel;
     }
 
-    private BodyTemperatureLevel bodyTemperatureLevel;
-
-    public BodyTemperatureChangedEvent(BodyTemperatureLevel bodyTemperatureLevel) {
-        this.bodyTemperatureLevel = bodyTemperatureLevel;
+    public BodyTemperatureLevel getNewBodyTemperatureLevel(){
+        return  newLevel;
     }
 
-    public BodyTemperatureLevel getBodyTemperatureLevel(){
-        return  bodyTemperatureLevel;
+    public BodyTemperatureLevel getOldBodyTemperatureLevel(){
+        return  oldLevel;
     }
 }

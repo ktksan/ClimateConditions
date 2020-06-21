@@ -22,5 +22,7 @@ import org.terasology.network.Replicate;
 public class BodyTemperatureComponent implements Component {
 
     @Replicate
-    public float bodyTemperature = 0.4f;
+    public float current = 0.4f;
+
+    BodyTemperatureLevel currentLevel;
 }
