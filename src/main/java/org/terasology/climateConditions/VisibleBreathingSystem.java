@@ -27,6 +27,7 @@ import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
 import org.terasology.logic.location.Location;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.particles.components.generators.VelocityRangeGeneratorComponent;
 import org.terasology.registry.In;
@@ -79,9 +80,9 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
             VelocityRangeGeneratorComponent velocity = maybeComponent.orElse(new VelocityRangeGeneratorComponent());
             direction.scale(0.5f);
             direction.addY(0.5f);
-            velocity.minVelocity = direction;
+            velocity.minVelocity = JomlUtil.from(direction);
             direction.scale(1.5f);
-            velocity.maxVelocity = direction;
+            velocity.maxVelocity = JomlUtil.from(direction);
             return velocity;
         });
         player.upsertComponent((VisibleBreathComponent.class), maybeComponent -> {
