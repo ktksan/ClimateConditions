@@ -46,7 +46,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
     private float regenReduceFactor = 0.8f;
-    private int newMaxHealth = 80;
+    private float newMaxHealth = 80;
     private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
