@@ -19,6 +19,8 @@ import org.terasology.biomesAPI.Biome;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -26,6 +28,9 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
+import org.terasology.logic.health.HealthComponent;
+import org.terasology.logic.health.event.ActivateRegenEvent;
+import org.terasology.logic.health.event.ChangeMaxHealthEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
@@ -40,6 +45,8 @@ import java.util.Optional;
 public class HyperthermiaSystem extends BaseComponentSystem {
     private float walkSpeedMultiplier = 0.7f;
     private float jumpSpeedMultiplier = 0.85f;
+    private float regenReduceFactor = 0.8f;
+    private float newMaxHealth = 80;
     private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
@@ -68,6 +75,16 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(components = {HyperthermiaComponent.class})
+    public void onHyperthermia(OnAddedComponent event, EntityRef player, HealthComponent health) {
+        weakenPlayer(player, health);
+    }
+
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
+    public void beforeRemoveHyperthermia(BeforeRemoveComponent event, EntityRef player, HealthComponent health) {
+        removePlayerWeakness(player, health);
+    }
+
+    @ReceiveEvent(components = {HyperthermiaComponent.class})
     public void modifyThirst(AffectThirstEvent event, EntityRef player) {
         event.multiply(thirstMultiplier);
     }
@@ -80,4 +97,17 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
+    private void weakenPlayer(EntityRef player, HealthComponent health) {
+        player.send(new ChangeMaxHealthEvent(newMaxHealth));
+        health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
+        health.regenRate *= regenReduceFactor;
+        player.saveComponent(health);
+    }
+
+    private void removePlayerWeakness(EntityRef player, HealthComponent health) {
+        player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
+        player.send(new ActivateRegenEvent());
+        health.regenRate /= regenReduceFactor;
+        player.saveComponent(health);
+    }
 }
