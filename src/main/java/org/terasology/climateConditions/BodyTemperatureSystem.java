@@ -22,7 +22,7 @@ import org.terasology.world.WorldComponent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class BodyTemperatureSystem extends BaseComponentSystem {
-    public static final String BODY_TEMPERATURE_UPDATE_ACTION_ID = "Body Temperature Update";
+    public static final String BODY_TEMPERATURE_UPDATE_ACTION_ID = "climateConditions:bodyTemperatureUpdate";
 
     private static final Logger logger = LoggerFactory.getLogger(BodyTemperatureSystem.class);
 
