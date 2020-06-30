@@ -55,10 +55,8 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                     BodyTemperatureComponent.class, LocationComponent.class)) {
                 LocationComponent location = entity.getComponent(LocationComponent.class);
                 BodyTemperatureComponent bodyTemperature = entity.getComponent(BodyTemperatureComponent.class);
-                float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition().getX(),
-                        location.getLocalPosition().getY(), location.getLocalPosition().getZ());
-                float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition().getX(),
-                        location.getLocalPosition().getY(), location.getLocalPosition().getZ());
+                float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition());
+                float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition());
                 float deltaTemp =
                         ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
                 /*
@@ -117,8 +115,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
             return BodyTemperatureLevel.LOW;
         } else if (temperature <= 0.6) {
             return BodyTemperatureLevel.NORMAL;
-        } else
-        {
+        } else {
             return BodyTemperatureLevel.HIGH;
         }
     }
