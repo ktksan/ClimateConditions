@@ -69,18 +69,19 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                  */
                 //Check for change in body temperature levels.
                 BodyTemperatureLevel before = lookupLevel(bodyTemperature.current);
-                BodyTemperatureLevel after = lookupLevel(bodyTemperature.current + deltaTemp);
+                //Update current body temperature.
+                bodyTemperature.current = bodyTemperature.current + deltaTemp;
+                entity.saveComponent(bodyTemperature);
+                BodyTemperatureLevel after = lookupLevel(bodyTemperature.current);
+
                 if (before != after) {
                     entity.send(new BodyTemperatureChangedEvent(before, after));
                     bodyTemperature.currentLevel = after;
                 }
-                //Update current body temperature.
-                bodyTemperature.current = bodyTemperature.current + deltaTemp;
                 //only for development purposes
                 entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
                         entity.getOwner()));
                 entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, entity.getOwner()));
-                entity.saveComponent(bodyTemperature);
             }
         }
     }
