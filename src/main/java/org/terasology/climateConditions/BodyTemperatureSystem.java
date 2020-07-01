@@ -33,7 +33,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     @In
     DelayManager delayManager;
 
-    private static final int CHECK_INTERVAL = 1000;
+    private static final int CHECK_INTERVAL = 2000;
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -59,12 +59,17 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition());
                 float deltaTemp =
                         ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
-                /*
+
                 //Send event for other systems to modify change in body temperature.
-                AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
-                entity.send(affectBodyTemperatureEvent);
-                deltaTemp = affectBodyTemperatureEvent.getResultValue();
-                 */
+                if(deltaTemp >= 0) {
+                    AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
+                    entity.send(affectBodyTemperatureEvent);
+                    deltaTemp = affectBodyTemperatureEvent.getResultValue();
+                } else {
+                    AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(-1 * deltaTemp);
+                    entity.send(affectBodyTemperatureEvent);
+                    deltaTemp = -1 * affectBodyTemperatureEvent.getResultValue();
+                }
                 //Check for change in body temperature levels.
                 BodyTemperatureLevel before = lookupLevel(bodyTemperature.current);
                 //Update current body temperature.
