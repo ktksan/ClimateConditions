@@ -59,28 +59,47 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Reduces the walking/running speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
     @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
         event.multiply(hyperthermia.walkSpeedMultiplier);
     }
 
+    /**
+     * Reduces the jump speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
     @ReceiveEvent
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
         event.multiply(hyperthermia.jumpSpeedMultiplier);
     }
 
+    /**
+     * Weakens the player by reducing the maxHealth of the player when {@link HyperthermiaComponent} is added.
+     */
     @ReceiveEvent
     public void onHyperthermia(OnAddedComponent event, EntityRef player, HealthComponent health,
                                HyperthermiaComponent hyperthermia) {
         weakenPlayer(player, health, hyperthermia);
     }
 
+    /**
+     * Removes the weakness of the player by restoring the maxHealth of the player to the original value when {@link
+     * HyperthermiaComponent} is removed.
+     */
     @ReceiveEvent
     public void beforeRemoveHyperthermia(BeforeRemoveComponent event, EntityRef player, HealthComponent health,
                                          HyperthermiaComponent hyperthermia) {
         removePlayerWeakness(player, health, hyperthermia);
     }
 
+    /**
+     * Increases the thirst decay per second of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
     @ReceiveEvent
     public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
         event.multiply(hyperthermia.thirstMultiplier);
