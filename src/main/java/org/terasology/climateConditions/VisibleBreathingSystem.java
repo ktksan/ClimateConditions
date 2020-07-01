@@ -80,9 +80,9 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
             VelocityRangeGeneratorComponent velocity = maybeComponent.orElse(new VelocityRangeGeneratorComponent());
             direction.scale(0.5f);
             direction.addY(0.5f);
-            velocity.minVelocity = new Vector3f(direction);
+            velocity.minVelocity = JomlUtil.from(direction);
             direction.scale(1.5f);
-            velocity.maxVelocity = new Vector3f(direction);
+            velocity.maxVelocity = JomlUtil.from(direction);
             return velocity;
         });
         player.upsertComponent((VisibleBreathComponent.class), maybeComponent -> {
