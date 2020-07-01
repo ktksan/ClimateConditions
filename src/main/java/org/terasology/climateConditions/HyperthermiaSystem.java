@@ -114,7 +114,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     private void weakenPlayer(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
-        player.send(new ChangeMaxHealthEvent((int) (hyperthermia.maxHealthMultiplier * health.maxHealth)));
+        player.send(new ChangeMaxHealthEvent(hyperthermia.maxHealthMultiplier * health.maxHealth));
         health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
         health.regenRate *= hyperthermia.regenMultiplier;
         player.saveComponent(health);
