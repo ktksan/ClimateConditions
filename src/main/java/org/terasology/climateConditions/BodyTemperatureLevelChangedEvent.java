@@ -5,12 +5,12 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.event.Event;
 
-public class BodyTemperatureChangedEvent implements Event {
+public class BodyTemperatureLevelChangedEvent implements Event {
     private BodyTemperatureLevel oldLevel;
     private BodyTemperatureLevel newLevel;
 
 
-    public BodyTemperatureChangedEvent(BodyTemperatureLevel oldLevel, BodyTemperatureLevel newLevel) {
+    public BodyTemperatureLevelChangedEvent(BodyTemperatureLevel oldLevel, BodyTemperatureLevel newLevel) {
         this.oldLevel = oldLevel;
         this.newLevel = newLevel;
     }

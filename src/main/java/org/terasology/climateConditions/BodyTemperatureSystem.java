@@ -33,7 +33,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     @In
     DelayManager delayManager;
 
-    private static final int CHECK_INTERVAL = 2000;
+    private static final int CHECK_INTERVAL = 1000;
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -72,15 +72,22 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 }
                 //Check for change in body temperature levels.
                 BodyTemperatureLevel before = lookupLevel(bodyTemperature.current);
+                float oldValue = bodyTemperature.current;
                 //Update current body temperature.
                 bodyTemperature.current = bodyTemperature.current + deltaTemp;
                 entity.saveComponent(bodyTemperature);
+                float newValue = bodyTemperature.current;
                 BodyTemperatureLevel after = lookupLevel(bodyTemperature.current);
 
                 if (before != after) {
-                    entity.send(new BodyTemperatureChangedEvent(before, after));
+                    entity.send(new BodyTemperatureLevelChangedEvent(before, after));
                     bodyTemperature.currentLevel = after;
                 }
+
+                if(oldValue != newValue) {
+                    entity.send(new BodyTemperatureValueChangedEvent(oldValue, newValue));
+                }
+
                 //only for development purposes
                 entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
                         entity.getOwner()));
@@ -90,21 +97,21 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onTemperatureChangedToHigh(BodyTemperatureChangedEvent event, EntityRef player) {
+    public void onTemperatureChangedToHigh(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.HIGH) {
             player.addOrSaveComponent(new HyperthermiaComponent());
         }
     }
 
     @ReceiveEvent
-    public void onTemperatureChangedToLow(BodyTemperatureChangedEvent event, EntityRef player) {
+    public void onTemperatureChangedToLow(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.LOW) {
             player.addOrSaveComponent(new HypothermiaComponent());
         }
     }
 
     @ReceiveEvent
-    public void onTemperatureChangedToNormal(BodyTemperatureChangedEvent event, EntityRef player) {
+    public void onTemperatureChangedToNormal(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.NORMAL) {
             if (player.hasComponent(HyperthermiaComponent.class)) {
                 player.removeComponent(HyperthermiaComponent.class);
