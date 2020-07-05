@@ -66,7 +66,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
                 entity.send(affectBodyTemperatureEvent);
                 deltaTemp = affectBodyTemperatureEvent.getResultValue();
-                if(affectBodyTemperatureEvent.isNegative()) {
+                if (affectBodyTemperatureEvent.isNegative()) {
                     deltaTemp *= -1;
                 }
 
@@ -76,7 +76,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 bodyTemperature.current = bodyTemperature.current + deltaTemp;
                 float newValue = bodyTemperature.current;
                 entity.saveComponent(bodyTemperature);
-                if(oldValue != newValue) {
+                if (oldValue != newValue) {
                     entity.send(new BodyTemperatureValueChangedEvent(oldValue, newValue));
                 }
 
@@ -92,7 +92,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     public void onBodyTemperatureValueChanged(BodyTemperatureValueChangedEvent event, EntityRef player) {
         BodyTemperatureLevel before = checkLevel(event.getOldBodyTemperatureValue());
         BodyTemperatureLevel after = checkLevel(event.getNewBodyTemperatureValue());
-        if(before != after) {
+        if (before != after) {
             player.send(new BodyTemperatureLevelChangedEvent(before, after));
         }
     }
@@ -100,15 +100,18 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         switch (event.getNewBodyTemperatureLevel()) {
-            case LOW: player.addOrSaveComponent(new HypothermiaComponent());
+            case LOW:
+                player.addOrSaveComponent(new HypothermiaComponent());
                 break;
-            case HIGH: player.addOrSaveComponent(new HyperthermiaComponent());
+            case HIGH:
+                player.addOrSaveComponent(new HyperthermiaComponent());
                 break;
-            case NORMAL: if (player.hasComponent(HyperthermiaComponent.class)) {
-                player.removeComponent(HyperthermiaComponent.class);
-            }else if (player.hasComponent(HypothermiaComponent.class)) {
-                player.removeComponent(HypothermiaComponent.class);
-            }
+            case NORMAL:
+                if (player.hasComponent(HyperthermiaComponent.class)) {
+                    player.removeComponent(HyperthermiaComponent.class);
+                } else if (player.hasComponent(HypothermiaComponent.class)) {
+                    player.removeComponent(HypothermiaComponent.class);
+                }
         }
     }
 

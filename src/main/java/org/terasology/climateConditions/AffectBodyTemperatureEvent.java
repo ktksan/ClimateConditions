@@ -6,15 +6,15 @@ package org.terasology.climateConditions;
 import org.terasology.entitySystem.event.AbstractValueModifiableEvent;
 
 /**
- * This event is sent out by the {@link BodyTemperatureSystem} to allow for other systems to
- * modify the change in body temperature.
+ * This event is sent out by the {@link BodyTemperatureSystem} to allow for other systems to modify the change in body
+ * temperature.
  */
 public class AffectBodyTemperatureEvent extends AbstractValueModifiableEvent {
     private boolean isNegative = false;
 
     public AffectBodyTemperatureEvent(float baseValue) {
         super((baseValue > 0) ? baseValue : (-1 * baseValue));
-        if(baseValue < 0) {
+        if (baseValue < 0) {
             isNegative = true;
         }
     }
