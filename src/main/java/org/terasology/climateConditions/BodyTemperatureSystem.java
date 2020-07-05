@@ -34,6 +34,8 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     DelayManager delayManager;
 
     private static final int CHECK_INTERVAL = 1000;
+    private float lowBodyTemperatureThreshold = 0.2f;
+    private float highBodyTemperatureThreshold = 0.7f;
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -61,29 +63,19 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                         ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
 
                 //Send event for other systems to modify change in body temperature.
-                if(deltaTemp >= 0) {
-                    AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
-                    entity.send(affectBodyTemperatureEvent);
-                    deltaTemp = affectBodyTemperatureEvent.getResultValue();
-                } else {
-                    AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(-1 * deltaTemp);
-                    entity.send(affectBodyTemperatureEvent);
-                    deltaTemp = -1 * affectBodyTemperatureEvent.getResultValue();
+                AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
+                entity.send(affectBodyTemperatureEvent);
+                deltaTemp = affectBodyTemperatureEvent.getResultValue();
+                if(affectBodyTemperatureEvent.isNegative()) {
+                    deltaTemp *= -1;
                 }
+
                 //Check for change in body temperature levels.
-                BodyTemperatureLevel before = lookupLevel(bodyTemperature.current);
                 float oldValue = bodyTemperature.current;
                 //Update current body temperature.
                 bodyTemperature.current = bodyTemperature.current + deltaTemp;
-                entity.saveComponent(bodyTemperature);
                 float newValue = bodyTemperature.current;
-                BodyTemperatureLevel after = lookupLevel(bodyTemperature.current);
-
-                if (before != after) {
-                    entity.send(new BodyTemperatureLevelChangedEvent(before, after));
-                    bodyTemperature.currentLevel = after;
-                }
-
+                entity.saveComponent(bodyTemperature);
                 if(oldValue != newValue) {
                     entity.send(new BodyTemperatureValueChangedEvent(oldValue, newValue));
                 }
@@ -97,35 +89,33 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onTemperatureChangedToHigh(BodyTemperatureLevelChangedEvent event, EntityRef player) {
-        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.HIGH) {
-            player.addOrSaveComponent(new HyperthermiaComponent());
+    public void onBodyTemperatureValueChanged(BodyTemperatureValueChangedEvent event, EntityRef player) {
+        BodyTemperatureLevel before = checkLevel(event.getOldBodyTemperatureValue());
+        BodyTemperatureLevel after = checkLevel(event.getNewBodyTemperatureValue());
+        if(before != after) {
+            player.send(new BodyTemperatureLevelChangedEvent(before, after));
         }
     }
 
     @ReceiveEvent
-    public void onTemperatureChangedToLow(BodyTemperatureLevelChangedEvent event, EntityRef player) {
-        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.LOW) {
-            player.addOrSaveComponent(new HypothermiaComponent());
-        }
-    }
-
-    @ReceiveEvent
-    public void onTemperatureChangedToNormal(BodyTemperatureLevelChangedEvent event, EntityRef player) {
-        if (event.getNewBodyTemperatureLevel() == BodyTemperatureLevel.NORMAL) {
-            if (player.hasComponent(HyperthermiaComponent.class)) {
+    public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
+        switch (event.getNewBodyTemperatureLevel()) {
+            case LOW: player.addOrSaveComponent(new HypothermiaComponent());
+                break;
+            case HIGH: player.addOrSaveComponent(new HyperthermiaComponent());
+                break;
+            case NORMAL: if (player.hasComponent(HyperthermiaComponent.class)) {
                 player.removeComponent(HyperthermiaComponent.class);
-            }
-            if (player.hasComponent(HypothermiaComponent.class)) {
+            }else if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
             }
         }
     }
 
-    public BodyTemperatureLevel lookupLevel(float temperature) {
-        if (temperature <= 0.3) {
+    public BodyTemperatureLevel checkLevel(float temperature) {
+        if (temperature <= lowBodyTemperatureThreshold) {
             return BodyTemperatureLevel.LOW;
-        } else if (temperature <= 0.6) {
+        } else if (temperature < highBodyTemperatureThreshold) {
             return BodyTemperatureLevel.NORMAL;
         } else {
             return BodyTemperatureLevel.HIGH;
