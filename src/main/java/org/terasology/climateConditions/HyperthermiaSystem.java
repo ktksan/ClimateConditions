@@ -43,11 +43,6 @@ import java.util.Optional;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
-    private float walkSpeedMultiplier = 0.7f;
-    private float jumpSpeedMultiplier = 0.85f;
-    private float regenReduceFactor = 0.8f;
-    private float newMaxHealth = 80;
-    private float thirstMultiplier = 2f;
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -64,29 +59,49 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
-        event.multiply(walkSpeedMultiplier);
+    /**
+     * Reduces the walking/running speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.walkSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
-        event.multiply(jumpSpeedMultiplier);
+    /**
+     * Reduces the jump speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.jumpSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void onHyperthermia(OnAddedComponent event, EntityRef player, HealthComponent health) {
-        weakenPlayer(player, health);
+    /**
+     * Weakens the player when {@link HyperthermiaComponent} is added.
+     */
+    @ReceiveEvent
+    public void onHyperthermia(OnAddedComponent event, EntityRef player, HealthComponent health,
+                               HyperthermiaComponent hyperthermia) {
+        applyWeakening(player, health, hyperthermia);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void beforeRemoveHyperthermia(BeforeRemoveComponent event, EntityRef player, HealthComponent health) {
-        removePlayerWeakness(player, health);
+    /**
+     * Reverts the player weakening when {@link HyperthermiaComponent} is removed.
+     */
+    @ReceiveEvent
+    public void beforeRemoveHyperthermia(BeforeRemoveComponent event, EntityRef player, HealthComponent health,
+                                         HyperthermiaComponent hyperthermia) {
+        revertWeakening(player, health, hyperthermia);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifyThirst(AffectThirstEvent event, EntityRef player) {
-        event.multiply(thirstMultiplier);
+    /**
+     * Increases the thirst decay per second of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.thirstMultiplier);
     }
 
     @ReceiveEvent
@@ -97,17 +112,24 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
-    private void weakenPlayer(EntityRef player, HealthComponent health) {
-        player.send(new ChangeMaxHealthEvent(newMaxHealth));
+    /**
+     * Weakens the player by reducing the maxHealth and regeneration of the player.
+     */
+    private void applyWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
+        player.send(new ChangeMaxHealthEvent(hyperthermia.maxHealthMultiplier * health.maxHealth));
         health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
-        health.regenRate *= regenReduceFactor;
+        health.regenRate *= hyperthermia.regenMultiplier;
         player.saveComponent(health);
     }
 
-    private void removePlayerWeakness(EntityRef player, HealthComponent health) {
+
+    /**
+     *  Reverts the player weakening by restoring the maxHealth and regeneration of the player to the original value.
+     */
+    private void revertWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
         player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
         player.send(new ActivateRegenEvent());
-        health.regenRate /= regenReduceFactor;
+        health.regenRate /= hyperthermia.regenMultiplier;
         player.saveComponent(health);
     }
 }
