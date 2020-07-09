@@ -22,6 +22,34 @@ import org.terasology.entitySystem.Component;
  * Is added/removed by the {@link HypothermiaSystem} when the player enters/leaves a "danger zone".
  */
 public class HypothermiaComponent implements Component {
-    public float walkSpeedMultiplier = 0.6f;
-    public float jumpSpeedMultiplier = 0.7f;
+    private final float walkSpeedMultiplier = 0.6f;
+    private final float jumpSpeedMultiplier = 0.7f;
+    public float hypothermiaLevel;
+    //Higher the value of the modifier, more dangerous the effects of Hypothermia.
+    public float allEffectModifier;
+
+    HypothermiaComponent() {
+        hypothermiaLevel =1;
+        allEffectModifier = 1;
+    }
+    HypothermiaComponent(int level) {
+        hypothermiaLevel = level;
+        allEffectModifier = level;
+    }
+
+    public float getEffectiveJumpSpeedMultiplier() {
+        return jumpSpeedMultiplier / allEffectModifier;
+    }
+
+    public float getEffectiveWalkSpeedMultiplier() {
+        return walkSpeedMultiplier / allEffectModifier;
+    }
+
+    public float getAllEffectModifier() {
+        return allEffectModifier;
+    }
+
+    public float getHypothermiaLevel() {
+        return hypothermiaLevel;
+    }
 }

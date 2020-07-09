@@ -65,7 +65,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
-        event.multiply(hyperthermia.walkSpeedMultiplier);
+        event.multiply(hyperthermia.getEffectiveWalkSpeedMultiplier());
     }
 
     /**
@@ -74,7 +74,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
-        event.multiply(hyperthermia.jumpSpeedMultiplier);
+        event.multiply(hyperthermia.getEffectiveJumpSpeedMultiplier());
     }
 
     /**
@@ -101,7 +101,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
-        event.multiply(hyperthermia.thirstMultiplier);
+        event.multiply(hyperthermia.getEffectiveThirstMultiplier());
     }
 
     @ReceiveEvent
@@ -116,9 +116,9 @@ public class HyperthermiaSystem extends BaseComponentSystem {
      * Weakens the player by reducing the maxHealth and regeneration of the player.
      */
     private void applyWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
-        player.send(new ChangeMaxHealthEvent(hyperthermia.maxHealthMultiplier * health.maxHealth));
+        player.send(new ChangeMaxHealthEvent(hyperthermia.getEffectiveMaxHealthMultiplier() * health.maxHealth));
         health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
-        health.regenRate *= hyperthermia.regenMultiplier;
+        health.regenRate *= hyperthermia.getEffectiveRegenMultiplier();
         player.saveComponent(health);
     }
 
@@ -129,7 +129,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     private void revertWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
         player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
         player.send(new ActivateRegenEvent());
-        health.regenRate /= hyperthermia.regenMultiplier;
+        health.regenRate /= hyperthermia.getEffectiveRegenMultiplier();
         player.saveComponent(health);
     }
 }
