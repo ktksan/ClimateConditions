@@ -22,4 +22,6 @@ import org.terasology.entitySystem.Component;
  * Is added/removed by the {@link HypothermiaSystem} when the player enters/leaves a "danger zone".
  */
 public class HypothermiaComponent implements Component {
+    public float walkSpeedMultiplier = 0.6f;
+    public float jumpSpeedMultiplier = 0.7f;
 }
