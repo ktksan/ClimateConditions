@@ -34,8 +34,6 @@ import org.terasology.physics.events.MovedEvent;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
     private final float thresholdHeight = 60f;
-    private float walkSpeedMultiplier = 0.6f;
-    private float jumpSpeedMultiplier = 0.7f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player) {
@@ -56,10 +54,10 @@ public class HypothermiaSystem extends BaseComponentSystem {
      * Reduces the walking/running speed of the player.
      * Is only active iff the player has a {@link HypothermiaComponent}.
      */
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HypothermiaComponent hypothermia) {
         if (event.getMovementMode() == MovementMode.WALKING) {
-            event.multiply(walkSpeedMultiplier);
+            event.multiply(hypothermia.walkSpeedMultiplier);
         }
     }
 
@@ -67,8 +65,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
      * Reduces the jump speed of the player.
      * Is only active iff the player has a {@link HypothermiaComponent}.
      */
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
-        event.multiply(jumpSpeedMultiplier);
+    @ReceiveEvent
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HypothermiaComponent hypothermia) {
+        event.multiply(hypothermia.jumpSpeedMultiplier);
     }
 }
