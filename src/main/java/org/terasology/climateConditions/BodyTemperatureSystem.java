@@ -35,7 +35,10 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
 
     private static final int CHECK_INTERVAL = 1000;
     private float lowBodyTemperatureThreshold = 0.2f;
-    private float highBodyTemperatureThreshold = 0.7f;
+    private float criticalLowBodyTemperatureThreshold = 0.1f;
+    private float highBodyTemperatureThreshold = 0.6f;
+    private float criticalHighBodyTemperatureThreshold = 0.7f;
+
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -103,8 +106,14 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
             case LOW:
                 player.addOrSaveComponent(new HypothermiaComponent());
                 break;
+            case CRITICAL_LOW:
+                player.addOrSaveComponent(new HypothermiaComponent(2));
+                break;
             case HIGH:
                 player.addOrSaveComponent(new HyperthermiaComponent());
+                break;
+            case CRITICAL_HIGH:
+                player.addOrSaveComponent(new HyperthermiaComponent(2));
                 break;
             case NORMAL:
                 if (player.hasComponent(HyperthermiaComponent.class)) {
@@ -116,12 +125,16 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     }
 
     public BodyTemperatureLevel checkLevel(float temperature) {
-        if (temperature <= lowBodyTemperatureThreshold) {
+        if (temperature <= criticalLowBodyTemperatureThreshold) {
+            return BodyTemperatureLevel.CRITICAL_LOW;
+        } else if (temperature <= lowBodyTemperatureThreshold) {
             return BodyTemperatureLevel.LOW;
         } else if (temperature < highBodyTemperatureThreshold) {
             return BodyTemperatureLevel.NORMAL;
-        } else {
+        } else if (temperature < criticalHighBodyTemperatureThreshold){
             return BodyTemperatureLevel.HIGH;
+        } else {
+            return BodyTemperatureLevel.CRITICAL_HIGH;
         }
     }
 }
