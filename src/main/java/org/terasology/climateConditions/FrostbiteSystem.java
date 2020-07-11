@@ -57,13 +57,12 @@ public class FrostbiteSystem extends BaseComponentSystem {
     private static final int healthDecreaseAmount = 15;
     private Random random = new FastRandom();
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onHypothermia(OnAddedComponent event, EntityRef player) {
+
+    public void applyFrostbite(EntityRef player) {
         delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
     }
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
+    public void removeFrostbite(EntityRef player) {
         delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
     }
 
@@ -78,7 +77,7 @@ public class FrostbiteSystem extends BaseComponentSystem {
 
     private void applyFrostbiteDamagePlayer(EntityRef player, HypothermiaComponent hypothermia) {
         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
-        player.send(new DoDamageEvent((int)(healthDecreaseAmount * hypothermia.getAllEffectModifier()), frostbiteDamagePrefab));
+        player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
     }
 
     private void applyStunEffect(EntityRef player, int duration) {

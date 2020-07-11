@@ -17,8 +17,6 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -33,9 +31,8 @@ import org.terasology.particles.components.generators.VelocityRangeGeneratorComp
 import org.terasology.registry.In;
 
 /**
- * Adds a {@link VisibleBreathComponent} to the player.
- * Visible breath is a periodic action adding a visible breath particle effect.
- * Is active only iff the player has a {@link HypothermiaComponent}
+ * Adds a {@link VisibleBreathComponent} to the player. Visible breath is a periodic action adding a visible breath
+ * particle effect. Is active only iff the player has a {@link HypothermiaComponent}
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class VisibleBreathingSystem extends BaseComponentSystem {
@@ -50,14 +47,12 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
     private int breathInterval = 7000;
 
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onHypothermia(OnAddedComponent event, EntityRef player) {
+    public void applyVisibleBreath(EntityRef player) {
         delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay,
                 breathInterval);
     }
 
-    @ReceiveEvent(components = HypothermiaComponent.class)
-    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
+    public void removeVisibleBreath(EntityRef player) {
         delayManager.cancelPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID);
     }
 

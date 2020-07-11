@@ -18,11 +18,11 @@ package org.terasology.climateConditions;
 import org.terasology.entitySystem.Component;
 
 public class HyperthermiaComponent implements Component {
-    private final float walkSpeedMultiplier = 0.7f;
-    private final float jumpSpeedMultiplier = 0.85f;
-    private final float regenMultiplier = 0.8f;
-    private final float maxHealthMultiplier = 0.8f;
-    private final float thirstMultiplier = 2f;
+    public float walkSpeedMultiplier = 0.7f;
+    public float jumpSpeedMultiplier = 0.85f;
+    public float regenMultiplier = 0.8f;
+    public float maxHealthMultiplier = 0.8f;
+    public float thirstMultiplier = 2f;
     public float hyperthermiaLevel;
     //Higher the value of the modifier, more dangerous the effects of Hyperthermia.
     public float allEffectModifier;
@@ -42,7 +42,7 @@ public class HyperthermiaComponent implements Component {
     }
 
     public float getEffectiveJumpSpeedMultiplier() {
-        return jumpSpeedMultiplier /  allEffectModifier;
+        return jumpSpeedMultiplier / allEffectModifier;
     }
 
     public float getEffectiveMaxHealthMultiplier() {

@@ -18,20 +18,21 @@ package org.terasology.climateConditions;
 import org.terasology.entitySystem.Component;
 
 /**
- * Increases the game difficulty in locations with extreme cold climate.
- * Is added/removed by the {@link HypothermiaSystem} when the player enters/leaves a "danger zone".
+ * Increases the game difficulty in locations with extreme cold climate. Is added/removed by the {@link
+ * HypothermiaSystem} when the player enters/leaves a "danger zone".
  */
 public class HypothermiaComponent implements Component {
-    private final float walkSpeedMultiplier = 0.6f;
-    private final float jumpSpeedMultiplier = 0.7f;
+    public float walkSpeedMultiplier = 0.6f;
+    public float jumpSpeedMultiplier = 0.7f;
     public float hypothermiaLevel;
     //Higher the value of the modifier, more dangerous the effects of Hypothermia.
     public float allEffectModifier;
 
     HypothermiaComponent() {
-        hypothermiaLevel =1;
+        hypothermiaLevel = 1;
         allEffectModifier = 1;
     }
+
     HypothermiaComponent(int level) {
         hypothermiaLevel = level;
         allEffectModifier = level;

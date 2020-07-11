@@ -21,52 +21,87 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
-import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.characters.MovementMode;
-import org.terasology.logic.players.PlayerCharacterComponent;
-import org.terasology.physics.events.MovedEvent;
+import org.terasology.logic.delay.DelayManager;
+import org.terasology.registry.In;
 
 /**
- * Adds a {@link HypothermiaComponent} to the player.
- * Hypothermia occurs in locations with extremely cold climate and, e.g., slows the player's movements.
+ * Adds a {@link HypothermiaComponent} to the player. Hypothermia occurs in locations with extremely cold climate and,
+ * e.g., slows the player's movements.
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
-    private final float thresholdHeight = 60f;
-
-    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void observeDangerZone(MovedEvent event, EntityRef player) {
-        //TODO: react on OnBiomeChangedEvent to handle the danger zone
-        float height = event.getPosition().getY();
-        float lastHeight = height - event.getDelta().getY();
-        if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-            player.addOrSaveComponent(new HypothermiaComponent());
-        }
-        if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-            if (player.hasComponent(HypothermiaComponent.class)) {
-                player.removeComponent(HypothermiaComponent.class);
-            }
-        }
-    }
+    @In
+    DelayManager delayManager;
+    @In
+    VisibleBreathingSystem visibleBreathingSystem;
+    @In
+    FrostbiteSystem frostbiteSystem;
 
     /**
-     * Reduces the walking/running speed of the player.
-     * Is only active iff the player has a {@link HypothermiaComponent}.
+     * Reduces the walking/running speed of the player. Is only active iff the player has a {@link
+     * HypothermiaComponent}.
      */
     @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HypothermiaComponent hypothermia) {
         if (event.getMovementMode() == MovementMode.WALKING) {
-            event.multiply(hypothermia.getEffectiveWalkSpeedMultiplier());
+            event.multiply(hypothermia.walkSpeedMultiplier);
         }
     }
 
     /**
-     * Reduces the jump speed of the player.
-     * Is only active iff the player has a {@link HypothermiaComponent}.
+     * Reduces the jump speed of the player. Is only active iff the player has a {@link HypothermiaComponent}.
      */
     @ReceiveEvent
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HypothermiaComponent hypothermia) {
-        event.multiply(hypothermia.getEffectiveJumpSpeedMultiplier());
+        event.multiply(hypothermia.jumpSpeedMultiplier);
+    }
+
+    @ReceiveEvent
+    public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
+                                        HypothermiaComponent hypothermia) {
+        modifySpeedMultipliers(player, hypothermia, event.getNewLevel());
+        //Adding New Effects when Hypothermia Level Increased.
+        switch (event.getNewLevel()) {
+            case 1:
+                if (event.getOldLevel() < 1) {
+                    visibleBreathingSystem.applyVisibleBreath(player);
+                }
+                break;
+            case 3:
+                if (event.getOldLevel() < 3) {
+                    frostbiteSystem.applyFrostbite(player);
+                }
+        }
+        //Removing effects when Hypothermia Level is decreased.
+        switch (event.getOldLevel()) {
+            case 1:
+                if (event.getNewLevel() < 1) {
+                    visibleBreathingSystem.removeVisibleBreath(player);
+                }
+                break;
+            case 3:
+                if (event.getNewLevel() < 3) {
+                    frostbiteSystem.removeFrostbite(player);
+                }
+        }
+    }
+
+    private void modifySpeedMultipliers(EntityRef player, HypothermiaComponent hypothermia, int level) {
+        switch (level) {
+            case 1:
+                hypothermia.walkSpeedMultiplier = 1;
+                hypothermia.jumpSpeedMultiplier = 1;
+                break;
+            case 2:
+                hypothermia.walkSpeedMultiplier = 0.7f;
+                hypothermia.jumpSpeedMultiplier = 0.7f;
+                break;
+            case 3:
+                hypothermia.walkSpeedMultiplier = 0.5f;
+                hypothermia.jumpSpeedMultiplier = 0.6f;
+        }
+        player.saveComponent(hypothermia);
     }
 }
