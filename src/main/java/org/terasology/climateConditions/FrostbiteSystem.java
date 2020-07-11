@@ -69,13 +69,13 @@ public class FrostbiteSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player, HypothermiaComponent hypothermia) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
-            applyFrostbiteDamagePlayer(player, hypothermia);
+            applyFrostbiteDamagePlayer(player);
             applyStunEffect(player, 1000);
             playFrostbiteSound(player);
         }
     }
 
-    private void applyFrostbiteDamagePlayer(EntityRef player, HypothermiaComponent hypothermia) {
+    private void applyFrostbiteDamagePlayer(EntityRef player) {
         Prefab frostbiteDamagePrefab = prefabManager.getPrefab("ClimateConditions:FrostbiteDamage");
         player.send(new DoDamageEvent(healthDecreaseAmount, frostbiteDamagePrefab));
     }
