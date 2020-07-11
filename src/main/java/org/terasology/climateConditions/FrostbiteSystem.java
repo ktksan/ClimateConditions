@@ -20,8 +20,6 @@ import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.context.Context;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
@@ -37,9 +35,8 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 
 /**
- * Adds frostbite to the player.
- * Frostbite is a periodic effect that, e.g., damages and stuns the player.
- * Is only active iff the player has a {@link HypothermiaComponent}.
+ * Adds frostbite to the player. Frostbite is a periodic effect that, e.g., damages and stuns the player. Is only active
+ * iff the player has a {@link HypothermiaComponent}.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FrostbiteSystem extends BaseComponentSystem {
@@ -67,7 +64,8 @@ public class FrostbiteSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player, HypothermiaComponent hypothermia) {
+    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player,
+                                    HypothermiaComponent hypothermia) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
             applyFrostbiteDamagePlayer(player);
             applyStunEffect(player, 1000);
