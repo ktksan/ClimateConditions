@@ -34,8 +34,13 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     DelayManager delayManager;
 
     private static final int CHECK_INTERVAL = 1000;
+    private float criticalLowBodyTemperatureThreshold = 0.1f;
     private float lowBodyTemperatureThreshold = 0.2f;
-    private float highBodyTemperatureThreshold = 0.7f;
+    private float reducedBodyTemperatureThreshold = 0.3f;
+    private float raisedBodyTemperatureThreshold = 0.5f;
+    private float highBodyTemperatureThreshold = 0.6f;
+    private float criticalHighBodyTemperatureThreshold = 0.7f;
+    //The Normal Body Temperature range is 0.3 - 0.5 as of now.
 
     public void postBegin() {
         boolean processedOnce = false;
@@ -60,7 +65,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition());
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition());
                 float deltaTemp =
-                        ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
+                        ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 200000) * CHECK_INTERVAL);
 
                 //Send event for other systems to modify change in body temperature.
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
@@ -99,11 +104,17 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
+        //TODO: After Introduction of Hypo/Hyperthermai Levels, change the level of thermia corresponding to each
+        // temperature level
         switch (event.getNewBodyTemperatureLevel()) {
+            case CRITICAL_LOW:
             case LOW:
+            case REDUCED:
                 player.addOrSaveComponent(new HypothermiaComponent());
                 break;
+            case RAISED:
             case HIGH:
+            case CRITICAL_HIGH:
                 player.addOrSaveComponent(new HyperthermiaComponent());
                 break;
             case NORMAL:
@@ -116,12 +127,20 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     }
 
     public BodyTemperatureLevel checkLevel(float temperature) {
-        if (temperature <= lowBodyTemperatureThreshold) {
+        if (temperature <= criticalLowBodyTemperatureThreshold) {
+            return BodyTemperatureLevel.CRITICAL_LOW;
+        } else if (temperature < lowBodyTemperatureThreshold) {
             return BodyTemperatureLevel.LOW;
-        } else if (temperature < highBodyTemperatureThreshold) {
+        } else if (temperature < reducedBodyTemperatureThreshold) {
+            return BodyTemperatureLevel.REDUCED;
+        } else if (temperature <= raisedBodyTemperatureThreshold) {
             return BodyTemperatureLevel.NORMAL;
-        } else {
+        } else if (temperature < highBodyTemperatureThreshold) {
+            return BodyTemperatureLevel.RAISED;
+        } else if (temperature < criticalHighBodyTemperatureThreshold) {
             return BodyTemperatureLevel.HIGH;
+        } else {
+            return BodyTemperatureLevel.CRITICAL_HIGH;
         }
     }
 }
