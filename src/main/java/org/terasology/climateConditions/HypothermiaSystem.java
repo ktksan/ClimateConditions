@@ -23,7 +23,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.characters.MovementMode;
-import org.terasology.logic.delay.DelayManager;
 import org.terasology.registry.In;
 
 /**
@@ -32,8 +31,6 @@ import org.terasology.registry.In;
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
-    @In
-    DelayManager delayManager;
     @In
     VisibleBreathingSystem visibleBreathingSystem;
     @In

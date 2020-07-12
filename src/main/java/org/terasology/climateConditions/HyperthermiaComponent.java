@@ -24,7 +24,7 @@ public class HyperthermiaComponent implements Component {
     public float maxHealthMultiplier = 0.8f;
     public float thirstMultiplier = 2f;
     public float hyperthermiaLevel;
-    //Higher the value of the modifier, more dangerous the effects of Hyperthermia.
+    //The higher the value of the modifier, the more dangerous the effects of Hyperthermia.
     public float allEffectModifier;
 
     HyperthermiaComponent() {

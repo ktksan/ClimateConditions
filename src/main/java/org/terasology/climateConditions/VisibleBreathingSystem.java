@@ -31,8 +31,9 @@ import org.terasology.particles.components.generators.VelocityRangeGeneratorComp
 import org.terasology.registry.In;
 
 /**
- * Adds a {@link VisibleBreathComponent} to the player. Visible breath is a periodic action adding a visible breath
- * particle effect. Is active only iff the player has a {@link HypothermiaComponent}
+ * Adds a {@link VisibleBreathComponent} to the player.
+ * Visible breath is a periodic action adding a visible breath particle effect.
+ * Is active only iff the player has a {@link HypothermiaComponent}
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class VisibleBreathingSystem extends BaseComponentSystem {
