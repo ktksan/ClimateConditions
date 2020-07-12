@@ -27,8 +27,8 @@ import org.terasology.logic.delay.DelayManager;
 import org.terasology.registry.In;
 
 /**
- * Adds a {@link HypothermiaComponent} to the player. Hypothermia occurs in locations with extremely cold climate and,
- * e.g., slows the player's movements.
+ * Adds a {@link HypothermiaComponent} to the player.
+ * Hypothermia occurs in locations with extremely cold climate and, e.g., slows the player's movements.
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
@@ -40,8 +40,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
     FrostbiteSystem frostbiteSystem;
 
     /**
-     * Reduces the walking/running speed of the player. Is only active iff the player has a {@link
-     * HypothermiaComponent}.
+     * Reduces the walking/running speed of the player.
+     * Is only active iff the player has a {@link HypothermiaComponent}.
      */
     @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HypothermiaComponent hypothermia) {
@@ -51,7 +51,8 @@ public class HypothermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Reduces the jump speed of the player. Is only active iff the player has a {@link HypothermiaComponent}.
+     * Reduces the jump speed of the player.
+     * Is only active iff the player has a {@link HypothermiaComponent}.
      */
     @ReceiveEvent
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HypothermiaComponent hypothermia) {
@@ -62,29 +63,26 @@ public class HypothermiaSystem extends BaseComponentSystem {
     public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
                                         HypothermiaComponent hypothermia) {
         modifySpeedMultipliers(player, hypothermia, event.getNewLevel());
-        //Adding New Effects when Hypothermia Level Increased.
-        switch (event.getNewLevel()) {
-            case 1:
-                if (event.getOldLevel() < 1) {
+        int oldLevel = event.getOldLevel();
+        int newLevel = event.getNewLevel();
+        if (oldLevel < newLevel) {
+            //Adding New Effects when Hypothermia Level Increased.
+            switch (newLevel) {
+                case 1:
                     visibleBreathingSystem.applyVisibleBreath(player);
-                }
-                break;
-            case 3:
-                if (event.getOldLevel() < 3) {
+                    break;
+                case 3:
                     frostbiteSystem.applyFrostbite(player);
-                }
-        }
-        //Removing effects when Hypothermia Level is decreased.
-        switch (event.getOldLevel()) {
-            case 1:
-                if (event.getNewLevel() < 1) {
+            }
+        } else {
+            //Removing effects when Hypothermia Level is decreased.
+            switch (oldLevel) {
+                case 1:
                     visibleBreathingSystem.removeVisibleBreath(player);
-                }
-                break;
-            case 3:
-                if (event.getNewLevel() < 3) {
+                    break;
+                case 3:
                     frostbiteSystem.removeFrostbite(player);
-                }
+            }
         }
     }
 

@@ -31,8 +31,8 @@ import org.terasology.thirst.event.AffectThirstEvent;
 public class HyperthermiaSystem extends BaseComponentSystem {
 
     /**
-     * Reduces the walking/running speed of the player. Is only active iff the player has a {@link
-     * HyperthermiaComponent}.
+     * Reduces the walking/running speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
      */
     @ReceiveEvent
     public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
@@ -40,7 +40,8 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Reduces the jump speed of the player. Is only active iff the player has a {@link HyperthermiaComponent}.
+     * Reduces the jump speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
      */
     @ReceiveEvent
     public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
@@ -48,8 +49,8 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Increases the thirst decay per second of the player. Is only active iff the player has a {@link
-     * HyperthermiaComponent}.
+     * Increases the thirst decay per second of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
      */
     @ReceiveEvent
     public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
