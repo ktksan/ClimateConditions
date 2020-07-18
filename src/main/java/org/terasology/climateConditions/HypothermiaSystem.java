@@ -15,6 +15,8 @@
  */
 package org.terasology.climateConditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -31,6 +33,8 @@ import org.terasology.registry.In;
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
+
     @In
     VisibleBreathingSystem visibleBreathingSystem;
     @In
@@ -59,7 +63,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
                                         HypothermiaComponent hypothermia) {
-        modifySpeedMultipliers(player, hypothermia, event.getNewLevel());
+        player.saveComponent(modifySpeedMultipliers(hypothermia, event.getNewLevel()));
         int oldLevel = event.getOldLevel();
         int newLevel = event.getNewLevel();
         if (oldLevel < newLevel) {
@@ -83,7 +87,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
         }
     }
 
-    private void modifySpeedMultipliers(EntityRef player, HypothermiaComponent hypothermia, int level) {
+    private HypothermiaComponent modifySpeedMultipliers(HypothermiaComponent hypothermia, int level) {
         switch (level) {
             case 1:
                 hypothermia.walkSpeedMultiplier = 1;
@@ -96,7 +100,11 @@ public class HypothermiaSystem extends BaseComponentSystem {
             case 3:
                 hypothermia.walkSpeedMultiplier = 0.5f;
                 hypothermia.jumpSpeedMultiplier = 0.6f;
+                break;
+            default:
+                logger.warn("Unexpected Hypothermia Level.");
+
         }
-        player.saveComponent(hypothermia);
+        return hypothermia;
     }
 }

@@ -23,41 +23,15 @@ public class HyperthermiaComponent implements Component {
     public float regenMultiplier = 0.8f;
     public float maxHealthMultiplier = 0.8f;
     public float thirstMultiplier = 2f;
-    public float hyperthermiaLevel;
-    //The higher the value of the modifier, the more dangerous the effects of Hyperthermia.
-    public float allEffectModifier;
+    //The level of Hyperthermia represents the degree of challenges faced due to Hyperthermia.
+    // As of now only levels - 1,2,3 are supported 1 being the least challenging and 3 the most.
+    public float level;
 
     HyperthermiaComponent() {
-        hyperthermiaLevel = 1;
-        allEffectModifier = 1;
+        level = 1;
     }
 
-    HyperthermiaComponent(int level) {
-        hyperthermiaLevel = level;
-        allEffectModifier = level;
-    }
-
-    public float getEffectiveWalkSpeedMultiplier() {
-        return walkSpeedMultiplier / allEffectModifier;
-    }
-
-    public float getEffectiveJumpSpeedMultiplier() {
-        return jumpSpeedMultiplier / allEffectModifier;
-    }
-
-    public float getEffectiveMaxHealthMultiplier() {
-        return maxHealthMultiplier / allEffectModifier;
-    }
-
-    public float getEffectiveRegenMultiplier() {
-        return regenMultiplier / allEffectModifier;
-    }
-
-    public float getEffectiveThirstMultiplier() {
-        return thirstMultiplier * allEffectModifier;
-    }
-
-    public float getAllEffectModifier() {
-        return allEffectModifier;
+    HyperthermiaComponent(int hyperthermiaLevel) {
+        level = hyperthermiaLevel;
     }
 }

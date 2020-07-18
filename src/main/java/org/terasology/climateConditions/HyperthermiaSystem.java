@@ -15,6 +15,8 @@
  */
 package org.terasology.climateConditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -29,6 +31,7 @@ import org.terasology.thirst.event.AffectThirstEvent;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
 
     /**
      * Reduces the walking/running speed of the player.
@@ -81,7 +84,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void hyperthermiaLevelChanged(HyperthermiaLevelChangedEvent event, EntityRef player,
                                          HyperthermiaComponent hyperthermia, HealthComponent health) {
-        modifyHyperthermiaMultipliers(player, hyperthermia, event.getNewLevel());
+        player.saveComponent(modifyHyperthermiaMultipliers(hyperthermia, event.getNewLevel()));
         //Adding New Effects when Hypothermia Level Increased.
         if (event.getNewLevel() == 3) {
             applyWeakening(player, health, hyperthermia);
@@ -90,7 +93,7 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
-    private void modifyHyperthermiaMultipliers(EntityRef player, HyperthermiaComponent hyperthermia, int level) {
+    private HyperthermiaComponent modifyHyperthermiaMultipliers(HyperthermiaComponent hyperthermia, int level) {
         switch (level) {
             case 1:
                 hyperthermia.walkSpeedMultiplier = 1;
@@ -106,7 +109,10 @@ public class HyperthermiaSystem extends BaseComponentSystem {
                 hyperthermia.walkSpeedMultiplier = 0.6f;
                 hyperthermia.jumpSpeedMultiplier = 0.7f;
                 hyperthermia.thirstMultiplier = 2.25f;
+                break;
+            default:
+                logger.warn("Unexpected Hyperthermia Level.");
         }
-        player.saveComponent(hyperthermia);
+        return hyperthermia;
     }
 }

@@ -24,33 +24,15 @@ import org.terasology.entitySystem.Component;
 public class HypothermiaComponent implements Component {
     public float walkSpeedMultiplier = 0.6f;
     public float jumpSpeedMultiplier = 0.7f;
-    public float hypothermiaLevel;
-    //Higher the value of the modifier, more dangerous the effects of Hypothermia.
-    public float allEffectModifier;
+    //The level of Hypothermia represents the degree of challenges faced due to Hypothermia.
+    // As of now only levels - 1,2,3 are supported 1 being the least challenging and 3 the most.
+    public float level;
 
     HypothermiaComponent() {
-        hypothermiaLevel = 1;
-        allEffectModifier = 1;
+        level = 1;
     }
 
-    HypothermiaComponent(int level) {
-        hypothermiaLevel = level;
-        allEffectModifier = level;
-    }
-
-    public float getEffectiveJumpSpeedMultiplier() {
-        return jumpSpeedMultiplier / allEffectModifier;
-    }
-
-    public float getEffectiveWalkSpeedMultiplier() {
-        return walkSpeedMultiplier / allEffectModifier;
-    }
-
-    public float getAllEffectModifier() {
-        return allEffectModifier;
-    }
-
-    public float getHypothermiaLevel() {
-        return hypothermiaLevel;
+    HypothermiaComponent(int hypothermiaLevel) {
+        level = hypothermiaLevel;
     }
 }

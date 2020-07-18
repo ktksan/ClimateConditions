@@ -5,11 +5,15 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.event.Event;
 
-public class ThermiaLevelChangedEvent implements Event {
+/**
+ * This event (or a subtype) is sent whenever the level attribute of Hypothermia or Hyperthermia Component is changed.
+ * This usually means a change in the challenges faced by the player due to abnormal body temperatures.
+ */
+public class AbstractThermiaLevelChangedEvent implements Event {
     private int oldLevel;
     private int newLevel;
 
-    ThermiaLevelChangedEvent(int oldLevel, int newLevel) {
+    AbstractThermiaLevelChangedEvent(int oldLevel, int newLevel) {
         this.oldLevel = oldLevel;
         this.newLevel = newLevel;
     }

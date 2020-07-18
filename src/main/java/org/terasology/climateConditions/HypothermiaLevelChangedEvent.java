@@ -3,7 +3,10 @@
 
 package org.terasology.climateConditions;
 
-public class HypothermiaLevelChangedEvent extends ThermiaLevelChangedEvent{
+/**
+ * An event sent out when the level attribute of {@link HypothermiaComponent} is changed.
+ */
+public class HypothermiaLevelChangedEvent extends AbstractThermiaLevelChangedEvent{
     public HypothermiaLevelChangedEvent(int oldLevel, int newLevel) {
         super(oldLevel,newLevel);
     }
