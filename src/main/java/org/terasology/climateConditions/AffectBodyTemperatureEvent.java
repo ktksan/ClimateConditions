@@ -10,6 +10,8 @@ import org.terasology.entitySystem.event.AbstractValueModifiableEvent;
  * temperature.
  */
 public class AffectBodyTemperatureEvent extends AbstractValueModifiableEvent {
+    //The following additions are only needed because the AbstractValueModifiableEvent does not support negative base
+    // values at the moment.
     private boolean isNegative = false;
 
     public AffectBodyTemperatureEvent(float baseValue) {
@@ -17,6 +19,14 @@ public class AffectBodyTemperatureEvent extends AbstractValueModifiableEvent {
         if (baseValue < 0) {
             isNegative = true;
         }
+    }
+
+    @Override
+    public float getResultValue() {
+        if (isNegative) {
+            return super.getResultValue() * -1;
+        }
+        return super.getResultValue();
     }
 
     public boolean isNegative() {

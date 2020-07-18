@@ -71,9 +71,6 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
                 entity.send(affectBodyTemperatureEvent);
                 deltaTemp = affectBodyTemperatureEvent.getResultValue();
-                if (affectBodyTemperatureEvent.isNegative()) {
-                    deltaTemp *= -1;
-                }
 
                 //Check for change in body temperature levels.
                 float oldValue = bodyTemperature.current;
@@ -95,8 +92,8 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBodyTemperatureValueChanged(BodyTemperatureValueChangedEvent event, EntityRef player) {
-        BodyTemperatureLevel before = checkLevel(event.getOldBodyTemperatureValue());
-        BodyTemperatureLevel after = checkLevel(event.getNewBodyTemperatureValue());
+        BodyTemperatureLevel before = checkLevel(event.getOldValue());
+        BodyTemperatureLevel after = checkLevel(event.getNewValue());
         if (before != after) {
             player.send(new BodyTemperatureLevelChangedEvent(before, after));
         }
@@ -104,9 +101,9 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
-        //TODO: After Introduction of Hypo/Hyperthermai Levels, change the level of thermia corresponding to each
+        //TODO: After Introduction of Hypo/Hyperthermia Levels, change the level of thermia corresponding to each
         // temperature level
-        switch (event.getNewBodyTemperatureLevel()) {
+        switch (event.getNewLevel()) {
             case CRITICAL_LOW:
             case LOW:
             case REDUCED:

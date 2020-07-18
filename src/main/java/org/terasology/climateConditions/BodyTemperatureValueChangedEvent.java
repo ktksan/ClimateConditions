@@ -15,11 +15,11 @@ public class BodyTemperatureValueChangedEvent implements Event {
         this.newValue = newValue;
     }
 
-    public float getNewBodyTemperatureValue() {
+    public float getNewValue() {
         return newValue;
     }
 
-    public float getOldBodyTemperatureValue() {
+    public float getOldValue() {
         return oldValue;
     }
 }
