@@ -25,13 +25,14 @@ public class HyperthermiaComponent implements Component {
     public float thirstMultiplier = 2f;
     //The level of Hyperthermia represents the degree of challenges faced due to Hyperthermia.
     // As of now only levels - 1,2,3 are supported 1 being the least challenging and 3 the most.
-    public float level;
+    //Level 0 represents no Hyperthermia i.e. HyperthermiaComponent should be removed when set to 0.
+    public int level;
 
     HyperthermiaComponent() {
         level = 1;
     }
 
-    HyperthermiaComponent(int hyperthermiaLevel) {
-        level = hyperthermiaLevel;
+    HyperthermiaComponent(int level) {
+        this.level = level;
     }
 }

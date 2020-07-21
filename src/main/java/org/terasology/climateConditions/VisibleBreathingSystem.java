@@ -17,6 +17,8 @@ package org.terasology.climateConditions;
 
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -48,12 +50,14 @@ public class VisibleBreathingSystem extends BaseComponentSystem {
     private int breathInterval = 7000;
 
 
-    public void applyVisibleBreath(EntityRef player) {
+    @ReceiveEvent(components = {HypothermiaComponent.class})
+    public void onHypothermia(OnAddedComponent event, EntityRef player) {
         delayManager.addPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID, initialDelay,
                 breathInterval);
     }
 
-    public void removeVisibleBreath(EntityRef player) {
+    @ReceiveEvent(components = HypothermiaComponent.class)
+    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
         delayManager.cancelPeriodicAction(player, VisibleBreathingSystem.VISIBLE_BREATH_ACTION_ID);
     }
 

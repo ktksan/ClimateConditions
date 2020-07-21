@@ -35,11 +35,6 @@ import org.terasology.registry.In;
 public class HypothermiaSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
 
-    @In
-    VisibleBreathingSystem visibleBreathingSystem;
-    @In
-    FrostbiteSystem frostbiteSystem;
-
     /**
      * Reduces the walking/running speed of the player.
      * Is only active iff the player has a {@link HypothermiaComponent}.
@@ -64,27 +59,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
     public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
                                         HypothermiaComponent hypothermia) {
         player.saveComponent(modifySpeedMultipliers(hypothermia, event.getNewLevel()));
-        int oldLevel = event.getOldLevel();
-        int newLevel = event.getNewLevel();
-        if (oldLevel < newLevel) {
-            //Adding New Effects when Hypothermia Level Increased.
-            switch (newLevel) {
-                case 1:
-                    visibleBreathingSystem.applyVisibleBreath(player);
-                    break;
-                case 3:
-                    frostbiteSystem.applyFrostbite(player);
-            }
-        } else {
-            //Removing effects when Hypothermia Level is decreased.
-            switch (oldLevel) {
-                case 1:
-                    visibleBreathingSystem.removeVisibleBreath(player);
-                    break;
-                case 3:
-                    frostbiteSystem.removeFrostbite(player);
-            }
-        }
     }
 
     private HypothermiaComponent modifySpeedMultipliers(HypothermiaComponent hypothermia, int level) {
@@ -103,7 +77,6 @@ public class HypothermiaSystem extends BaseComponentSystem {
                 break;
             default:
                 logger.warn("Unexpected Hypothermia Level.");
-
         }
         return hypothermia;
     }

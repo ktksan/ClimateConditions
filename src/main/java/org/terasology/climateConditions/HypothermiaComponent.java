@@ -26,13 +26,14 @@ public class HypothermiaComponent implements Component {
     public float jumpSpeedMultiplier = 0.7f;
     //The level of Hypothermia represents the degree of challenges faced due to Hypothermia.
     // As of now only levels - 1,2,3 are supported 1 being the least challenging and 3 the most.
-    public float level;
+    //Level 0 represents no Hypothermia i.e. HypothermiaComponent should be removed when set to 0.
+    public int level;
 
     HypothermiaComponent() {
         level = 1;
     }
 
-    HypothermiaComponent(int hypothermiaLevel) {
-        level = hypothermiaLevel;
+    HypothermiaComponent(int level) {
+        this.level = level;
     }
 }

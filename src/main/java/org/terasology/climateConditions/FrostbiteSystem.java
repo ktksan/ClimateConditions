@@ -37,7 +37,7 @@ import org.terasology.utilities.random.Random;
 /**
  * Adds frostbite to the player.
  * Frostbite is a periodic effect that, e.g., damages and stuns the player.
- * Is only active iff the player has a {@link HypothermiaComponent}.
+ * Is only active iff the player has a {@link HypothermiaComponent} level 3 or greater.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FrostbiteSystem extends BaseComponentSystem {
@@ -55,12 +55,26 @@ public class FrostbiteSystem extends BaseComponentSystem {
     private static final int healthDecreaseAmount = 15;
     private Random random = new FastRandom();
 
+    /**
+     * Responsible for adding and removing frostbite effect according to changes in Hypothermia Levels.
+     */
+    @ReceiveEvent
+    public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player) {
+        int oldLevel = event.getOldLevel();
+        int newLevel = event.getNewLevel();
+        //Frostbite Effect remains active for Hypothermia Levels 3 and greater.
+        if(newLevel == 3 && oldLevel < newLevel) {
+            applyFrostbite(player);
+        } else if(oldLevel == 3 && newLevel > oldLevel) {
+            removeFrostbite(player);
+        }
+    }
 
-    public void applyFrostbite(EntityRef player) {
+    private void applyFrostbite(EntityRef player) {
         delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
     }
 
-    public void removeFrostbite(EntityRef player) {
+    private void removeFrostbite(EntityRef player) {
         delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
     }
 
