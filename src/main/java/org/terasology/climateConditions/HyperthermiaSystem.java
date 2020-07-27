@@ -17,21 +17,48 @@ package org.terasology.climateConditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.biomesAPI.Biome;
+import org.terasology.biomesAPI.BiomeRegistry;
+import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
+import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.health.HealthComponent;
 import org.terasology.logic.health.event.ActivateRegenEvent;
 import org.terasology.logic.health.event.ChangeMaxHealthEvent;
+import org.terasology.logic.location.LocationComponent;
+import org.terasology.logic.players.PlayerCharacterComponent;
+import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
+import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
+import org.terasology.registry.In;
 import org.terasology.thirst.event.AffectThirstEvent;
+
+import java.util.Optional;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
+    private final Name DesertId = new Name("CoreWorlds:Desert");
+
+    @In
+    BiomeRegistry biomeRegistry;
+
+    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
+    public void onBiomeChange(OnBiomeChangedEvent event, EntityRef player) {
+        if (event.getNewBiome().getId().equals(DesertId)) {
+            player.addOrSaveComponent(new HyperthermiaComponent());
+        } else {
+            if (player.hasComponent(HyperthermiaComponent.class)) {
+                player.removeComponent(HyperthermiaComponent.class);
+            }
+        }
+    }
 
     /**
      * Reduces the walking/running speed of the player.
@@ -58,6 +85,14 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
         event.multiply(hyperthermia.thirstMultiplier);
+    }
+
+    @ReceiveEvent
+    public void onSpawn(OnPlayerSpawnedEvent event, EntityRef player, LocationComponent location) {
+        final Optional<Biome> biome = biomeRegistry.getBiome(new Vector3i(location.getLocalPosition()));
+        if (biome.get().getId().equals(DesertId)) {
+            player.addOrSaveComponent(new HyperthermiaComponent());
+        }
     }
 
     /**
