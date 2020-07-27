@@ -24,9 +24,15 @@ import org.terasology.entitySystem.Component;
 public class HypothermiaComponent implements Component {
     public float walkSpeedMultiplier = 0.6f;
     public float jumpSpeedMultiplier = 0.7f;
-    //The level of Hypothermia represents the degree of challenges faced due to Hypothermia.
-    // As of now only levels - 1,2,3 are supported 1 being the least challenging and 3 the most.
-    //Level 0 represents no Hypothermia i.e. HypothermiaComponent should be removed when set to 0.
+    /**
+     * The level represents the degree of challenges faced due to Hypothermia.
+     * <p>
+     * The level is expected to be a positive integer. As of now only levels one to three are supported. Increasing
+     * level denotes increasing difficulty, i.e., level 1 being the least challenging and level 3 the most.
+     * <p>
+     * Level 0 represents no Hypothermia, i.e., the HypothermiaComponent should be removed when this value is supposed
+     * to become 0.
+     */
     public int level;
 
     HypothermiaComponent() {
