@@ -3,23 +3,10 @@
 
 package org.terasology.climateConditions;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.event.BeforeAfterEvent;
 
-public class BodyTemperatureValueChangedEvent implements Event {
-    private float oldValue;
-    private float newValue;
-
-
+public class BodyTemperatureValueChangedEvent extends BeforeAfterEvent<Float> {
     public BodyTemperatureValueChangedEvent(float oldValue, float newValue) {
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-    }
-
-    public float getNewValue() {
-        return newValue;
-    }
-
-    public float getOldValue() {
-        return oldValue;
+        super(oldValue, newValue);
     }
 }

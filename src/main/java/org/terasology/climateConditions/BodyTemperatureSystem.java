@@ -103,7 +103,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         //TODO: After Introduction of Hypo/Hyperthermia Levels, change the level of thermia corresponding to each
         // temperature level
-        switch (event.getNewLevel()) {
+        switch (event.getNewValue()) {
             case CRITICAL_LOW:
             case LOW:
             case REDUCED:

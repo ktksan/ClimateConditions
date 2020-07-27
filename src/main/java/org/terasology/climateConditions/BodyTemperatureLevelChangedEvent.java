@@ -3,23 +3,10 @@
 
 package org.terasology.climateConditions;
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.event.BeforeAfterEvent;
 
-public class BodyTemperatureLevelChangedEvent implements Event {
-    private BodyTemperatureLevel oldLevel;
-    private BodyTemperatureLevel newLevel;
-
-
+public class BodyTemperatureLevelChangedEvent extends BeforeAfterEvent<BodyTemperatureLevel> {
     public BodyTemperatureLevelChangedEvent(BodyTemperatureLevel oldLevel, BodyTemperatureLevel newLevel) {
-        this.oldLevel = oldLevel;
-        this.newLevel = newLevel;
-    }
-
-    public BodyTemperatureLevel getNewLevel() {
-        return newLevel;
-    }
-
-    public BodyTemperatureLevel getOldLevel() {
-        return oldLevel;
+        super(oldLevel, newLevel);
     }
 }
