@@ -15,12 +15,12 @@
  */
 package org.terasology.climateConditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.biomesAPI.OnBiomeChangedEvent;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -43,6 +43,7 @@ import java.util.Optional;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -78,24 +79,6 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     }
 
     /**
-     * Weakens the player when {@link HyperthermiaComponent} is added.
-     */
-    @ReceiveEvent
-    public void onHyperthermia(OnAddedComponent event, EntityRef player, HealthComponent health,
-                               HyperthermiaComponent hyperthermia) {
-        applyWeakening(player, health, hyperthermia);
-    }
-
-    /**
-     * Reverts the player weakening when {@link HyperthermiaComponent} is removed.
-     */
-    @ReceiveEvent
-    public void beforeRemoveHyperthermia(BeforeRemoveComponent event, EntityRef player, HealthComponent health,
-                                         HyperthermiaComponent hyperthermia) {
-        revertWeakening(player, health, hyperthermia);
-    }
-
-    /**
      * Increases the thirst decay per second of the player.
      * Is only active iff the player has a {@link HyperthermiaComponent}.
      */
@@ -124,12 +107,49 @@ public class HyperthermiaSystem extends BaseComponentSystem {
 
 
     /**
-     *  Reverts the player weakening by restoring the maxHealth and regeneration of the player to the original value.
+     * Reverts the player weakening by restoring the maxHealth and regeneration of the player to the original value.
      */
     private void revertWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
         player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
         player.send(new ActivateRegenEvent());
         health.regenRate /= hyperthermia.regenMultiplier;
         player.saveComponent(health);
+    }
+
+    @ReceiveEvent
+    public void hyperthermiaLevelChanged(HyperthermiaLevelChangedEvent event, EntityRef player,
+                                         HyperthermiaComponent hyperthermia, HealthComponent health) {
+        int oldLevel = event.getOldValue();
+        int newLevel = event.getNewValue();
+        player.saveComponent(modifyHyperthermiaMultipliers(hyperthermia, newLevel));
+        //Weakening effect remains active for Hyperthermia levels 3 and greater.
+        if (newLevel == 3 && oldLevel < newLevel) {
+            applyWeakening(player, health, hyperthermia);
+        } else if (oldLevel == 3 && oldLevel > newLevel) {
+            revertWeakening(player, health, hyperthermia);
+        }
+    }
+
+    private HyperthermiaComponent modifyHyperthermiaMultipliers(HyperthermiaComponent hyperthermia, int level) {
+        switch (level) {
+            case 1:
+                hyperthermia.walkSpeedMultiplier = 1;
+                hyperthermia.jumpSpeedMultiplier = 1;
+                hyperthermia.thirstMultiplier = 1.5f;
+                break;
+            case 2:
+                hyperthermia.walkSpeedMultiplier = 0.7f;
+                hyperthermia.jumpSpeedMultiplier = 0.85f;
+                hyperthermia.thirstMultiplier = 2f;
+                break;
+            case 3:
+                hyperthermia.walkSpeedMultiplier = 0.6f;
+                hyperthermia.jumpSpeedMultiplier = 0.7f;
+                hyperthermia.thirstMultiplier = 2.25f;
+                break;
+            default:
+                logger.warn("Unexpected Hyperthermia Level.");
+        }
+        return hyperthermia;
     }
 }
