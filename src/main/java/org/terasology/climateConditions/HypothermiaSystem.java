@@ -58,7 +58,7 @@ public class HypothermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
                                         HypothermiaComponent hypothermia) {
-        player.saveComponent(modifySpeedMultipliers(hypothermia, event.getNewLevel()));
+        player.saveComponent(modifySpeedMultipliers(hypothermia, event.getNewValue()));
     }
 
     private HypothermiaComponent modifySpeedMultipliers(HypothermiaComponent hypothermia, int level) {

@@ -3,10 +3,12 @@
 
 package org.terasology.climateConditions;
 
+import org.terasology.entitySystem.event.BeforeAfterEvent;
+
 /**
  * An event sent out when the level attribute of {@link HyperthermiaComponent} is changed.
  */
-public class HyperthermiaLevelChangedEvent extends AbstractThermiaLevelChangedEvent {
+public class HyperthermiaLevelChangedEvent extends BeforeAfterEvent<Integer> {
     public HyperthermiaLevelChangedEvent(int oldLevel, int newLevel) {
         super(oldLevel, newLevel);
     }

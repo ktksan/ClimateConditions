@@ -60,8 +60,8 @@ public class FrostbiteSystem extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player) {
-        int oldLevel = event.getOldLevel();
-        int newLevel = event.getNewLevel();
+        int oldLevel = event.getOldValue();
+        int newLevel = event.getNewValue();
         //Frostbite Effect remains active for Hypothermia Levels 3 and greater.
         if(newLevel == 3 && oldLevel < newLevel) {
             applyFrostbite(player);

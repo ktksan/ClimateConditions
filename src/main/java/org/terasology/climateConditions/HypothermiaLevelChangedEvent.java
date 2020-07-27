@@ -3,11 +3,13 @@
 
 package org.terasology.climateConditions;
 
+import org.terasology.entitySystem.event.BeforeAfterEvent;
+
 /**
  * An event sent out when the level attribute of {@link HypothermiaComponent} is changed.
  * NOTE: level 0 represents the player does not have a HypothermiaComponent.
  */
-public class HypothermiaLevelChangedEvent extends AbstractThermiaLevelChangedEvent{
+public class HypothermiaLevelChangedEvent extends BeforeAfterEvent<Integer> {
     public HypothermiaLevelChangedEvent(int oldLevel, int newLevel) {
         super(oldLevel,newLevel);
     }

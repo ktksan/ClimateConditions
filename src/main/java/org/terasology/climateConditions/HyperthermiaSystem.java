@@ -84,8 +84,8 @@ public class HyperthermiaSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void hyperthermiaLevelChanged(HyperthermiaLevelChangedEvent event, EntityRef player,
                                          HyperthermiaComponent hyperthermia, HealthComponent health) {
-        int oldLevel = event.getOldLevel();
-        int newLevel = event.getNewLevel();
+        int oldLevel = event.getOldValue();
+        int newLevel = event.getNewValue();
         player.saveComponent(modifyHyperthermiaMultipliers(hyperthermia, newLevel));
         //Weakening effect remains active for Hyperthermia levels 3 and greater.
         if (newLevel == 3 && oldLevel < newLevel) {
