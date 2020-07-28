@@ -34,12 +34,12 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     DelayManager delayManager;
 
     private static final int CHECK_INTERVAL = 1000;
-    private float criticalLowBodyTemperatureThreshold = 0.1f;
-    private float lowBodyTemperatureThreshold = 0.2f;
+    private float criticalLowBodyTemperatureThreshold = 0.17f;
+    private float lowBodyTemperatureThreshold = 0.22f;
     private float reducedBodyTemperatureThreshold = 0.3f;
     private float raisedBodyTemperatureThreshold = 0.5f;
-    private float highBodyTemperatureThreshold = 0.6f;
-    private float criticalHighBodyTemperatureThreshold = 0.7f;
+    private float highBodyTemperatureThreshold = 0.55f;
+    private float criticalHighBodyTemperatureThreshold = 0.6f;
     //The Normal Body Temperature range is 0.3 - 0.5 as of now.
 
     public void postBegin() {
@@ -55,6 +55,10 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
         // The world is the entity here which shall have a Body Temperature Update Periodic Action.
     }
 
+    /**
+     * Updates the Body Temperature System when the periodic action with actionId = BODY_TEMPERATURE_UPDATE_ACTION_ID is
+     * triggered.
+     */
     @ReceiveEvent
     public void onTemperatureUpdate(PeriodicActionTriggeredEvent event, EntityRef world) {
         if (event.getActionId().equals(BODY_TEMPERATURE_UPDATE_ACTION_ID)) {
@@ -85,52 +89,98 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 //only for development purposes
                 entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
                         entity.getOwner()));
-                entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature, entity.getOwner()));
+                entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature,
+                        entity.getOwner()));
             }
         }
     }
 
+    /**
+     * Reacts to {@link BodyTemperatureValueChangedEvent} and modifies the body temperature level in case it needs to be
+     * changed.
+     */
     @ReceiveEvent
-    public void onBodyTemperatureValueChanged(BodyTemperatureValueChangedEvent event, EntityRef player) {
-        BodyTemperatureLevel before = checkLevel(event.getOldValue());
-        BodyTemperatureLevel after = checkLevel(event.getNewValue());
+    public void onBodyTemperatureValueChanged(BodyTemperatureValueChangedEvent event, EntityRef player,
+                                              BodyTemperatureComponent bodyTemperature) {
+        BodyTemperatureLevel before = checkBodyTemperatureLevel(event.getOldValue());
+        BodyTemperatureLevel after = checkBodyTemperatureLevel(event.getNewValue());
         if (before != after) {
+            bodyTemperature.currentLevel = after;
+            player.addOrSaveComponent(bodyTemperature);
             player.send(new BodyTemperatureLevelChangedEvent(before, after));
         }
     }
 
+    /**
+     * Deals with addition and removal of Hypothermia and Hyperthermia Components.
+     */
     @ReceiveEvent
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
-        //TODO: After Introduction of Hypo/Hyperthermia Levels, change the level of thermia corresponding to each
-        // temperature level
-        switch (event.getNewValue()) {
-            case CRITICAL_LOW:
-            case LOW:
-            case REDUCED:
-                player.addOrSaveComponent(new HypothermiaComponent());
-                break;
-            case RAISED:
-            case HIGH:
-            case CRITICAL_HIGH:
-                player.addOrSaveComponent(new HyperthermiaComponent());
-                break;
-            case NORMAL:
-                if (player.hasComponent(HyperthermiaComponent.class)) {
-                    player.removeComponent(HyperthermiaComponent.class);
-                } else if (player.hasComponent(HypothermiaComponent.class)) {
-                    player.removeComponent(HypothermiaComponent.class);
-                }
+        int oldLevel = checkThermiaLevel(event.getOldValue());
+        int newLevel = checkThermiaLevel(event.getNewValue());
+        if(newLevel > 0) { // newLevel lies in the Hyperthermia range.
+
+            if(oldLevel < 0) { // oldLevel lies in the Hypothermia range
+                player.removeComponent(HypothermiaComponent.class);
+                player.send(new HypothermiaLevelChangedEvent(-1 * oldLevel, 0));
+            }
+            player.addOrSaveComponent(new HyperthermiaComponent(newLevel));
+            player.send(new HyperthermiaLevelChangedEvent(Math.max(oldLevel,0), newLevel));
+
+        } else if(newLevel < 0) { // newLevel lies in the Hypothermia range.
+
+            if(oldLevel > 0) { // oldLevel lies in the Hyperthermia range.
+                player.removeComponent(HyperthermiaComponent.class);
+                player.send(new HyperthermiaLevelChangedEvent(oldLevel, 0));
+            }
+            player.addOrSaveComponent(new HypothermiaComponent(-1 * newLevel));
+            player.send(new HypothermiaLevelChangedEvent(Math.max(-1 * oldLevel, 0),-1 * newLevel));
+
+        } else { // newLevel == 0 which corresponds to normal body temperature.
+
+            if(player.hasComponent(HyperthermiaComponent.class)) {
+                player.removeComponent(HyperthermiaComponent.class);
+                player.send(new HyperthermiaLevelChangedEvent(oldLevel,0));
+            }
+            if(player.hasComponent(HypothermiaComponent.class)) {
+                player.removeComponent(HypothermiaComponent.class);
+                player.send(new HypothermiaLevelChangedEvent(-1 * oldLevel,0));
+            }
+
         }
     }
 
-    public BodyTemperatureLevel checkLevel(float temperature) {
+    /**
+     * Returns the Thermia level corresponding to the BodyTemperatureLevel.
+     */
+    private int checkThermiaLevel(BodyTemperatureLevel level) {
+        /**
+         * Positive values lie in the Hyperthermia Range and the corresponding Hyperthermia level is the value returned.
+         * Negative values lie in the Hypothermia Range and the corresponding Hypothermia Level is (-1 * value).
+         * Zero corresponds to normal body temperature.
+         */
+         switch (level) {
+            case CRITICAL_LOW: return -3;
+            case LOW: return -2;
+            case REDUCED: return -1;
+            case RAISED: return 1;
+            case HIGH: return 2;
+            case CRITICAL_HIGH: return 3;
+            default: return 0;                 // NORMAL
+        }
+    }
+
+    /**
+     * Returns the BodyTemperatureLevel corresponding to the body temperature value.
+     */
+    public BodyTemperatureLevel checkBodyTemperatureLevel(float temperature) {
         if (temperature <= criticalLowBodyTemperatureThreshold) {
             return BodyTemperatureLevel.CRITICAL_LOW;
-        } else if (temperature < lowBodyTemperatureThreshold) {
+        } else if (temperature <= lowBodyTemperatureThreshold) {
             return BodyTemperatureLevel.LOW;
-        } else if (temperature < reducedBodyTemperatureThreshold) {
+        } else if (temperature <= reducedBodyTemperatureThreshold) {
             return BodyTemperatureLevel.REDUCED;
-        } else if (temperature <= raisedBodyTemperatureThreshold) {
+        } else if (temperature < raisedBodyTemperatureThreshold) {
             return BodyTemperatureLevel.NORMAL;
         } else if (temperature < highBodyTemperatureThreshold) {
             return BodyTemperatureLevel.RAISED;

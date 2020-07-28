@@ -23,35 +23,18 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
-import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
 import org.terasology.logic.characters.MovementMode;
-import org.terasology.logic.players.PlayerCharacterComponent;
-import org.terasology.physics.events.MovedEvent;
 
 /**
- * Adds a {@link HypothermiaComponent} to the player.
- * Hypothermia occurs in locations with extremely cold climate and, e.g., slows the player's movements.
+ *  Handles effects related to Hypothermia.
+ *  Hypothermia occurs in case of extremely low body temperature and, e.g., slows the player's movements.
+ *  For adding new effects in existing or new Hypothermia Levels, {@link HypothermiaLevelChangedEvent} should be
+ *  reacted to either in this or a separate authority system for eg. {@link FrostbiteSystem}.
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
-    private final float thresholdHeight = 60f;
-
-    @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
-    public void observeDangerZone(MovedEvent event, EntityRef player) {
-        //TODO: react on OnBiomeChangedEvent to handle the danger zone
-        float height = event.getPosition().getY();
-        float lastHeight = height - event.getDelta().getY();
-        if (height > thresholdHeight && lastHeight <= thresholdHeight) {
-            player.addOrSaveComponent(new HypothermiaComponent());
-        }
-        if (height < thresholdHeight && lastHeight >= thresholdHeight) {
-            if (player.hasComponent(HypothermiaComponent.class)) {
-                player.removeComponent(HypothermiaComponent.class);
-            }
-        }
-    }
 
     /**
      * Reduces the walking/running speed of the player.
