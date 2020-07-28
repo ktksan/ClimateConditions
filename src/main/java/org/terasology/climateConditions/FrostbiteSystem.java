@@ -20,8 +20,6 @@ import org.terasology.audio.StaticSound;
 import org.terasology.audio.events.PlaySoundEvent;
 import org.terasology.context.Context;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.BeforeRemoveComponent;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
@@ -39,7 +37,7 @@ import org.terasology.utilities.random.Random;
 /**
  * Adds frostbite to the player.
  * Frostbite is a periodic effect that, e.g., damages and stuns the player.
- * Is only active iff the player has a {@link HypothermiaComponent}.
+ * Is only active iff the player has a {@link HypothermiaComponent} level 3 or greater.
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class FrostbiteSystem extends BaseComponentSystem {
@@ -57,18 +55,32 @@ public class FrostbiteSystem extends BaseComponentSystem {
     private static final int healthDecreaseAmount = 15;
     private Random random = new FastRandom();
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onHypothermia(OnAddedComponent event, EntityRef player) {
+    /**
+     * Responsible for adding and removing frostbite effect according to changes in Hypothermia Levels.
+     */
+    @ReceiveEvent
+    public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player) {
+        int oldLevel = event.getOldValue();
+        int newLevel = event.getNewValue();
+        //Frostbite Effect remains active for Hypothermia Levels 3 and greater.
+        if(newLevel == 3 && oldLevel < newLevel) {
+            applyFrostbite(player);
+        } else if(oldLevel == 3 && newLevel > oldLevel) {
+            removeFrostbite(player);
+        }
+    }
+
+    private void applyFrostbite(EntityRef player) {
         delayManager.addPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID, initialDelay, healthDecreaseInterval);
     }
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void beforeRemoveHypothermia(BeforeRemoveComponent event, EntityRef player) {
+    private void removeFrostbite(EntityRef player) {
         delayManager.cancelPeriodicAction(player, FROSTBITE_DAMAGE_ACTION_ID);
     }
 
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player) {
+    @ReceiveEvent
+    public void onPeriodicFrostbite(PeriodicActionTriggeredEvent event, EntityRef player,
+                                    HypothermiaComponent hypothermia) {
         if (event.getActionId().equals(FROSTBITE_DAMAGE_ACTION_ID)) {
             applyFrostbiteDamagePlayer(player);
             applyStunEffect(player, 1000);

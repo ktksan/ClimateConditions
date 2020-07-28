@@ -15,6 +15,8 @@
  */
 package org.terasology.climateConditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -33,9 +35,8 @@ import org.terasology.physics.events.MovedEvent;
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HypothermiaSystem extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
     private final float thresholdHeight = 60f;
-    private float walkSpeedMultiplier = 0.6f;
-    private float jumpSpeedMultiplier = 0.7f;
 
     @ReceiveEvent(components = {PlayerCharacterComponent.class, CharacterMovementComponent.class})
     public void observeDangerZone(MovedEvent event, EntityRef player) {
@@ -56,10 +57,10 @@ public class HypothermiaSystem extends BaseComponentSystem {
      * Reduces the walking/running speed of the player.
      * Is only active iff the player has a {@link HypothermiaComponent}.
      */
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HypothermiaComponent hypothermia) {
         if (event.getMovementMode() == MovementMode.WALKING) {
-            event.multiply(walkSpeedMultiplier);
+            event.multiply(hypothermia.walkSpeedMultiplier);
         }
     }
 
@@ -67,8 +68,34 @@ public class HypothermiaSystem extends BaseComponentSystem {
      * Reduces the jump speed of the player.
      * Is only active iff the player has a {@link HypothermiaComponent}.
      */
-    @ReceiveEvent(components = {HypothermiaComponent.class})
-    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
-        event.multiply(jumpSpeedMultiplier);
+    @ReceiveEvent
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HypothermiaComponent hypothermia) {
+        event.multiply(hypothermia.jumpSpeedMultiplier);
+    }
+
+    @ReceiveEvent
+    public void hypothermiaLevelChanged(HypothermiaLevelChangedEvent event, EntityRef player,
+                                        HypothermiaComponent hypothermia) {
+        player.saveComponent(modifySpeedMultipliers(hypothermia, event.getNewValue()));
+    }
+
+    private HypothermiaComponent modifySpeedMultipliers(HypothermiaComponent hypothermia, int level) {
+        switch (level) {
+            case 1:
+                hypothermia.walkSpeedMultiplier = 1;
+                hypothermia.jumpSpeedMultiplier = 1;
+                break;
+            case 2:
+                hypothermia.walkSpeedMultiplier = 0.7f;
+                hypothermia.jumpSpeedMultiplier = 0.7f;
+                break;
+            case 3:
+                hypothermia.walkSpeedMultiplier = 0.5f;
+                hypothermia.jumpSpeedMultiplier = 0.6f;
+                break;
+            default:
+                logger.warn("Unexpected Hypothermia Level.");
+        }
+        return hypothermia;
     }
 }

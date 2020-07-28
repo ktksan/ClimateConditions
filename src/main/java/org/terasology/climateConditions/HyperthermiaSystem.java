@@ -15,6 +15,8 @@
  */
 package org.terasology.climateConditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.biomesAPI.OnBiomeChangedEvent;
@@ -26,6 +28,9 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AffectJumpForceEvent;
 import org.terasology.logic.characters.CharacterMovementComponent;
 import org.terasology.logic.characters.GetMaxSpeedEvent;
+import org.terasology.logic.health.HealthComponent;
+import org.terasology.logic.health.event.ActivateRegenEvent;
+import org.terasology.logic.health.event.ChangeMaxHealthEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.players.PlayerCharacterComponent;
 import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
@@ -38,9 +43,7 @@ import java.util.Optional;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class HyperthermiaSystem extends BaseComponentSystem {
-    private float walkSpeedMultiplier = 0.7f;
-    private float jumpSpeedMultiplier = 0.85f;
-    private float thirstMultiplier = 2f;
+    private static final Logger logger = LoggerFactory.getLogger(HyperthermiaSystem.class);
     private final Name DesertId = new Name("CoreWorlds:Desert");
 
     @In
@@ -57,19 +60,31 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player) {
-        event.multiply(walkSpeedMultiplier);
+    /**
+     * Reduces the walking/running speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifySpeed(GetMaxSpeedEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.walkSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player) {
-        event.multiply(jumpSpeedMultiplier);
+    /**
+     * Reduces the jump speed of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifyJumpSpeed(AffectJumpForceEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.jumpSpeedMultiplier);
     }
 
-    @ReceiveEvent(components = {HyperthermiaComponent.class})
-    public void modifyThirst(AffectThirstEvent event, EntityRef player) {
-        event.multiply(thirstMultiplier);
+    /**
+     * Increases the thirst decay per second of the player.
+     * Is only active iff the player has a {@link HyperthermiaComponent}.
+     */
+    @ReceiveEvent
+    public void modifyThirst(AffectThirstEvent event, EntityRef player, HyperthermiaComponent hyperthermia) {
+        event.multiply(hyperthermia.thirstMultiplier);
     }
 
     @ReceiveEvent
@@ -80,4 +95,61 @@ public class HyperthermiaSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Weakens the player by reducing the maxHealth and regeneration of the player.
+     */
+    private void applyWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
+        player.send(new ChangeMaxHealthEvent(hyperthermia.maxHealthMultiplier * health.maxHealth));
+        health.currentHealth = Math.min(health.currentHealth, health.maxHealth);
+        health.regenRate *= hyperthermia.regenMultiplier;
+        player.saveComponent(health);
+    }
+
+
+    /**
+     * Reverts the player weakening by restoring the maxHealth and regeneration of the player to the original value.
+     */
+    private void revertWeakening(EntityRef player, HealthComponent health, HyperthermiaComponent hyperthermia) {
+        player.send(new ChangeMaxHealthEvent(player.getParentPrefab().getComponent(HealthComponent.class).maxHealth));
+        player.send(new ActivateRegenEvent());
+        health.regenRate /= hyperthermia.regenMultiplier;
+        player.saveComponent(health);
+    }
+
+    @ReceiveEvent
+    public void hyperthermiaLevelChanged(HyperthermiaLevelChangedEvent event, EntityRef player,
+                                         HyperthermiaComponent hyperthermia, HealthComponent health) {
+        int oldLevel = event.getOldValue();
+        int newLevel = event.getNewValue();
+        player.saveComponent(modifyHyperthermiaMultipliers(hyperthermia, newLevel));
+        //Weakening effect remains active for Hyperthermia levels 3 and greater.
+        if (newLevel == 3 && oldLevel < newLevel) {
+            applyWeakening(player, health, hyperthermia);
+        } else if (oldLevel == 3 && oldLevel > newLevel) {
+            revertWeakening(player, health, hyperthermia);
+        }
+    }
+
+    private HyperthermiaComponent modifyHyperthermiaMultipliers(HyperthermiaComponent hyperthermia, int level) {
+        switch (level) {
+            case 1:
+                hyperthermia.walkSpeedMultiplier = 1;
+                hyperthermia.jumpSpeedMultiplier = 1;
+                hyperthermia.thirstMultiplier = 1.5f;
+                break;
+            case 2:
+                hyperthermia.walkSpeedMultiplier = 0.7f;
+                hyperthermia.jumpSpeedMultiplier = 0.85f;
+                hyperthermia.thirstMultiplier = 2f;
+                break;
+            case 3:
+                hyperthermia.walkSpeedMultiplier = 0.6f;
+                hyperthermia.jumpSpeedMultiplier = 0.7f;
+                hyperthermia.thirstMultiplier = 2.25f;
+                break;
+            default:
+                logger.warn("Unexpected Hyperthermia Level.");
+        }
+        return hyperthermia;
+    }
 }
