@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.registry.Share;
 
 import java.util.Map;
@@ -41,11 +42,11 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
 
     private float humidityMinimum;
     private float humidityMaximum;
-    
+
     private String worldSeed;
-    
-    public void setWorldSeed(String worldSeed){
-    	this.worldSeed = worldSeed;
+
+    public void setWorldSeed(String worldSeed) {
+        this.worldSeed = worldSeed;
     }
 
     public void addTemperatureModifier(float order, ConditionModifier temperatureModifier) {
@@ -59,7 +60,7 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
     public void configureTemperature(int seaLevel, int maxLevel, float diversity, Function<Float, Float> function,
                                      float minimumValue, float maximumValue) {
         int seed = worldSeed.hashCode();
-        
+
         float noiseMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * diversity;
 
         temperatureBaseField = new ConditionsBaseField(seaLevel, maxLevel, noiseMultiplier, function, seed + 582374);
@@ -110,6 +111,14 @@ public class ClimateConditionsSystem extends BaseComponentSystem {
         }
 
         return value;
+    }
+
+    public float getTemperature(Vector3f position) {
+        return getTemperature(position.getX(), position.getY(), position.getZ());
+    }
+
+    public float getHumidity(Vector3f position) {
+        return getHumidity(position.getX(), position.getY(), position.getZ());
     }
 
     public String getWorldSeed() {
