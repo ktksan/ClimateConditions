@@ -88,10 +88,12 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 }
 
                 //only for development purposes
-                entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
-                        entity.getOwner()));
-                entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature,
-                        entity.getOwner()));
+                if (Math.round(oldValue * 100) != Math.round(newValue * 100)) {
+                    entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
+                            entity.getOwner()));
+                    entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature,
+                            entity.getOwner()));
+                }
             }
         }
     }
