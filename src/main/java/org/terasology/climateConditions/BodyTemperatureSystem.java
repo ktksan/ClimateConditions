@@ -12,6 +12,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.characters.AliveCharacterComponent;
+import org.terasology.logic.characters.events.PlayerDeathEvent;
 import org.terasology.logic.chat.ChatMessageEvent;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
@@ -38,8 +39,8 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     private float lowBodyTemperatureThreshold = 0.22f;
     private float reducedBodyTemperatureThreshold = 0.3f;
     private float raisedBodyTemperatureThreshold = 0.5f;
-    private float highBodyTemperatureThreshold = 0.55f;
-    private float criticalHighBodyTemperatureThreshold = 0.6f;
+    private float highBodyTemperatureThreshold = 0.58f;
+    private float criticalHighBodyTemperatureThreshold = 0.63f;
     //The Normal Body Temperature range is 0.3 - 0.5 as of now.
 
     public void postBegin() {
@@ -69,7 +70,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 float envTemperature = climateConditionsSystem.getTemperature(location.getLocalPosition());
                 float envHumidity = climateConditionsSystem.getHumidity(location.getLocalPosition());
                 float deltaTemp =
-                        ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 200000) * CHECK_INTERVAL);
+                        ((((envTemperature - (envHumidity / 10)) - bodyTemperature.current) / 100000) * CHECK_INTERVAL);
 
                 //Send event for other systems to modify change in body temperature.
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
@@ -87,10 +88,12 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 }
 
                 //only for development purposes
-                entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
-                        entity.getOwner()));
-                entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature,
-                        entity.getOwner()));
+                if (Math.round(oldValue * 100) != Math.round(newValue * 100)) {
+                    entity.getOwner().send(new ChatMessageEvent("Body Temperature: " + bodyTemperature.current,
+                            entity.getOwner()));
+                    entity.getOwner().send(new ChatMessageEvent("Env Temperature: " + envTemperature,
+                            entity.getOwner()));
+                }
             }
         }
     }
@@ -196,5 +199,16 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
         } else {
             return BodyTemperatureLevel.CRITICAL_HIGH;
         }
+    }
+
+    /**
+     * Resets body temperature when the player dies.
+     */
+    @ReceiveEvent
+    public void temperatureReset(PlayerDeathEvent event, EntityRef player, BodyTemperatureComponent bodyTemperature) {
+        float oldTemperature = bodyTemperature.current;
+        bodyTemperature.current = player.getParentPrefab().getComponent(BodyTemperatureComponent.class).current;
+        player.saveComponent(bodyTemperature);
+        player.send(new BodyTemperatureValueChangedEvent(oldTemperature, bodyTemperature.current));
     }
 }
