@@ -118,33 +118,33 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
     public void onBodyTemperatureLevelChanged(BodyTemperatureLevelChangedEvent event, EntityRef player) {
         int oldLevel = checkThermiaLevel(event.getOldValue());
         int newLevel = checkThermiaLevel(event.getNewValue());
-        if(newLevel > 0) { // newLevel lies in the Hyperthermia range.
+        if (newLevel > 0) { // newLevel lies in the Hyperthermia range.
 
-            if(oldLevel < 0) { // oldLevel lies in the Hypothermia range
+            if (oldLevel < 0) { // oldLevel lies in the Hypothermia range
                 player.removeComponent(HypothermiaComponent.class);
                 player.send(new HypothermiaLevelChangedEvent(-1 * oldLevel, 0));
             }
             player.addOrSaveComponent(new HyperthermiaComponent(newLevel));
-            player.send(new HyperthermiaLevelChangedEvent(Math.max(oldLevel,0), newLevel));
+            player.send(new HyperthermiaLevelChangedEvent(Math.max(oldLevel, 0), newLevel));
 
-        } else if(newLevel < 0) { // newLevel lies in the Hypothermia range.
+        } else if (newLevel < 0) { // newLevel lies in the Hypothermia range.
 
-            if(oldLevel > 0) { // oldLevel lies in the Hyperthermia range.
+            if (oldLevel > 0) { // oldLevel lies in the Hyperthermia range.
                 player.removeComponent(HyperthermiaComponent.class);
                 player.send(new HyperthermiaLevelChangedEvent(oldLevel, 0));
             }
             player.addOrSaveComponent(new HypothermiaComponent(-1 * newLevel));
-            player.send(new HypothermiaLevelChangedEvent(Math.max(-1 * oldLevel, 0),-1 * newLevel));
+            player.send(new HypothermiaLevelChangedEvent(Math.max(-1 * oldLevel, 0), -1 * newLevel));
 
         } else { // newLevel == 0 which corresponds to normal body temperature.
 
-            if(player.hasComponent(HyperthermiaComponent.class)) {
+            if (player.hasComponent(HyperthermiaComponent.class)) {
                 player.removeComponent(HyperthermiaComponent.class);
-                player.send(new HyperthermiaLevelChangedEvent(oldLevel,0));
+                player.send(new HyperthermiaLevelChangedEvent(oldLevel, 0));
             }
-            if(player.hasComponent(HypothermiaComponent.class)) {
+            if (player.hasComponent(HypothermiaComponent.class)) {
                 player.removeComponent(HypothermiaComponent.class);
-                player.send(new HypothermiaLevelChangedEvent(-1 * oldLevel,0));
+                player.send(new HypothermiaLevelChangedEvent(-1 * oldLevel, 0));
             }
 
         }
@@ -159,14 +159,21 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
          * Negative values lie in the Hypothermia Range and the corresponding Hypothermia Level is (-1 * value).
          * Zero corresponds to normal body temperature.
          */
-         switch (level) {
-            case CRITICAL_LOW: return -3;
-            case LOW: return -2;
-            case REDUCED: return -1;
-            case RAISED: return 1;
-            case HIGH: return 2;
-            case CRITICAL_HIGH: return 3;
-            default: return 0;                 // NORMAL
+        switch (level) {
+            case CRITICAL_LOW:
+                return -3;
+            case LOW:
+                return -2;
+            case REDUCED:
+                return -1;
+            case RAISED:
+                return 1;
+            case HIGH:
+                return 2;
+            case CRITICAL_HIGH:
+                return 3;
+            default:
+                return 0;                 // NORMAL
         }
     }
 
