@@ -37,13 +37,39 @@ public class BodyTemperatureAlterationEffect implements AlterationEffect {
      *
      * @param instigator The entity who applied the body temperature alteration effect.
      * @param entity The entity that the body temperature alteration effect is being applied on.
-     * @param id Stores information on type of body temperature change alteration - change depends on whether
-     *         temperature is decreasing or increasing.
+     * @param id Not applicable for this effect.
      * @param magnitude The magnitude of the body temperature alteration effect.
      * @param duration The duration of the body temperature alteration effect.
      */
     @Override
     public void applyEffect(EntityRef instigator, EntityRef entity, String id, float magnitude, long duration) {
+        applyEffect(instigator, entity, "", magnitude, duration, TemperatureAlterationCondition.ALWAYS);
+    }
+
+    /**
+     * This will apply the body temperature alteration effect on the given entity by calling the method {@link
+     * #applyEffect(EntityRef, EntityRef, String id, float, long)}.
+     *
+     * @param instigator The entity who applied the body temperature alteration effect.
+     * @param entity The entity that the body temperature alteration effect is being applied on.
+     * @param magnitude The magnitude of the body temperature alteration effect.
+     * @param duration The duration of the body temperature alteration effect.
+     */
+    @Override
+    public void applyEffect(EntityRef instigator, EntityRef entity, float magnitude, long duration) {
+        applyEffect(instigator, entity, "", magnitude, duration, TemperatureAlterationCondition.ALWAYS);
+    }
+
+    /**
+     * @param instigator The entity who applied the body temperature alteration effect.
+     * @param entity The entity that the body temperature alteration effect is being applied on.
+     * @param id Not applicable for this effect.
+     * @param magnitude The magnitude of the body temperature alteration effect.
+     * @param duration The duration of the body temperature alteration effect.
+     * @param condition Stores information regarding type of body temperature change alteration - change depends on
+     * whether temperature is decreasing or increasing.
+     */
+    public void applyEffect(EntityRef instigator, EntityRef entity, String id, float magnitude, long duration, TemperatureAlterationCondition condition) {
         // First, determine if the entity already has a swim speed component attached. If so, just replace the speed
         // multiplier, and then save the component. Otherwise, create a new one and attach it to the entity.
         AffectBodyTemperatureComponent affectBodyTemperature =
@@ -52,7 +78,7 @@ public class BodyTemperatureAlterationEffect implements AlterationEffect {
             affectBodyTemperature = new AffectBodyTemperatureComponent();
         }
         affectBodyTemperature.postMultiplier = magnitude;
-        affectBodyTemperature.id = id;
+        affectBodyTemperature.condition = condition;
         entity.addOrSaveComponent(affectBodyTemperature);
 
         // Send out this event to collect all the duration and magnitude modifiers and multipliers that can affect this
@@ -107,19 +133,5 @@ public class BodyTemperatureAlterationEffect implements AlterationEffect {
         // If this point is reached and none of the above if-clauses were met, that means there was at least one
         // modifier
         // collected in the event which has infinite duration.
-    }
-
-    /**
-     * This will apply the body temperature alteration effect on the given entity by calling the method {@link
-     * #applyEffect(EntityRef, EntityRef, String id, float, long)}.
-     *
-     * @param instigator The entity who applied the body temperature alteration effect.
-     * @param entity The entity that the body temperature alteration effect is being applied on.
-     * @param magnitude The magnitude of the body temperature alteration effect.
-     * @param duration The duration of the body temperature alteration effect.
-     */
-    @Override
-    public void applyEffect(EntityRef instigator, EntityRef entity, float magnitude, long duration) {
-        applyEffect(instigator, entity, "", magnitude, duration);
     }
 }

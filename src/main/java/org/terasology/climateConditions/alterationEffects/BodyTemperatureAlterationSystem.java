@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
  */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
-    public static final String BODY_TEMPERATURE = "BodyTemperature";
 
     @In
     Context context;
@@ -44,8 +43,8 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
 
     @Override
     public void initialise() {
-        effectComponents.put(BODY_TEMPERATURE, AffectBodyTemperatureComponent.class);
-        alterationEffects.put(BODY_TEMPERATURE, new BodyTemperatureAlterationEffect(context));
+        effectComponents.put(BodyTemperatureAlterationEffect.BODY_TEMPERATURE, AffectBodyTemperatureComponent.class);
+        alterationEffects.put(BodyTemperatureAlterationEffect.BODY_TEMPERATURE, new BodyTemperatureAlterationEffect(context));
     }
 
     /**
@@ -62,12 +61,12 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
         AffectBodyTemperatureComponent affectBodyTemperatureComponent =
                 entityRef.getComponent(AffectBodyTemperatureComponent.class);
         if (affectBodyTemperatureComponent != null) {
-            if (affectBodyTemperatureComponent.id.equals("")) {
+            if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ALWAYS) {
                 event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
             } else {
-                if (affectBodyTemperatureComponent.id.equals("activateWhenEnvironmentColder") && event.isNegative()) {
+                if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_DECREASE && event.isNegative()) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
-                } else if (affectBodyTemperatureComponent.id.equals("activateWhenEnvironmentHotter") && !event.isNegative()) {
+                } else if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_INCREASE && !event.isNegative()) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
                 }
             }
@@ -120,4 +119,3 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
         }
     }
 }
-
