@@ -83,7 +83,7 @@ public class BodyTemperatureAlterationEffect implements AlterationEffect {
 
         // Send out this event to collect all the duration and magnitude modifiers and multipliers that can affect this
         // effect.
-        OnEffectModifyEvent effectModifyEvent = entity.send(new OnEffectModifyEvent(instigator, entity, magnitude, duration, this, id));
+        OnEffectModifyEvent effectModifyEvent = entity.send(new OnEffectModifyEvent(instigator, entity, 0, 0, this, id));
         long modifiedDuration = 0;
         boolean modifiersFound = false;
 
