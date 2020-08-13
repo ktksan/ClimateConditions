@@ -75,7 +75,7 @@ public class BodyTemperatureSystem extends BaseComponentSystem {
                 //Send event for other systems to modify change in body temperature.
                 AffectBodyTemperatureEvent affectBodyTemperatureEvent = new AffectBodyTemperatureEvent(deltaTemp);
                 entity.send(affectBodyTemperatureEvent);
-                deltaTemp = affectBodyTemperatureEvent.getResultValue();
+                deltaTemp = affectBodyTemperatureEvent.getResultValueWithoutCapping();
 
                 //Check for change in body temperature levels.
                 float oldValue = bodyTemperature.current;

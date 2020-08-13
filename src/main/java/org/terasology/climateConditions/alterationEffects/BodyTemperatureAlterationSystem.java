@@ -44,7 +44,8 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
     @Override
     public void initialise() {
         effectComponents.put(BodyTemperatureAlterationEffect.BODY_TEMPERATURE, AffectBodyTemperatureComponent.class);
-        alterationEffects.put(BodyTemperatureAlterationEffect.BODY_TEMPERATURE, new BodyTemperatureAlterationEffect(context));
+        alterationEffects.put(BodyTemperatureAlterationEffect.BODY_TEMPERATURE,
+                new BodyTemperatureAlterationEffect(context));
     }
 
     /**
@@ -64,9 +65,9 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
             if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ALWAYS) {
                 event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
             } else {
-                if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_DECREASE && event.isNegative()) {
+                if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_DECREASE && (event.getResultValueWithoutCapping() < 0)) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
-                } else if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_INCREASE && !event.isNegative()) {
+                } else if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_INCREASE && (event.getResultValueWithoutCapping() > 0)) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
                 }
             }
