@@ -65,9 +65,10 @@ public class BodyTemperatureAlterationSystem extends BaseComponentSystem {
             if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ALWAYS) {
                 event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
             } else {
-                if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_DECREASE && (event.getResultValueWithoutCapping() < 0)) {
+                float deltaTemp = event.getResultValueWithoutCapping();
+                if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_DECREASE && (deltaTemp < 0)) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
-                } else if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_INCREASE && (event.getResultValueWithoutCapping() > 0)) {
+                } else if (affectBodyTemperatureComponent.condition == TemperatureAlterationCondition.ON_INCREASE && (deltaTemp > 0)) {
                     event.addPostMultiply(affectBodyTemperatureComponent.postMultiplier);
                 }
             }
