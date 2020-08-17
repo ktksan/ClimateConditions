@@ -31,10 +31,13 @@ import org.terasology.world.generator.plugin.RegisterPlugin;
 @Produces(IglooFacet.class)
 public class IglooProvider implements FacetProviderPlugin {
     private Noise noise;
+    private static final int ARBITRARY_OVERLAP_OFFSET = 3;
+    private static final int SNOW_BIOME_THRESHOLD = 96;
+    //TODO: Get the snow biome threshold from the SolidRasterizer in CoreWorlds.
 
     @Override
     public void setSeed(long seed) {
-        noise = new WhiteNoise(seed + 3);
+        noise = new WhiteNoise(seed + ARBITRARY_OVERLAP_OFFSET);
     }
 
     /**
@@ -61,7 +64,7 @@ public class IglooProvider implements FacetProviderPlugin {
                 if (surfaceHeight >= facet.getWorldRegion().minY() &&
                         surfaceHeight <= facet.getWorldRegion().maxY()) {
                     // Sea Level + 96 is the height at which snow blocks are placed in all biomes.
-                    if (noise.noise(wx, wz) > 0.9999f && (surfaceHeight >= seaLevel + 96f ||
+                    if (noise.noise(wx, wz) > 0.9999f && (surfaceHeight >= seaLevel + SNOW_BIOME_THRESHOLD ||
                             biomeFacet.getWorld(wx, wz).getId().equals(CoreBiome.SNOW))) {
                         int lowestY = getLowestY(surfaceHeightFacet, new Vector2i(wx, wz),
                                 Igloo.SIZE, Igloo.SIZE);
