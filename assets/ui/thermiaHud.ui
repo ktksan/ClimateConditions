@@ -1,0 +1,53 @@
+{
+    "type": "ThermiaHud",
+    "contents": {
+        "type": "relativeLayout",
+        "contents": [
+            {
+                "type": "UIBox",
+                "layoutInfo": {
+                    "height": 50,
+                    "position-bottom": {
+                        "offset": 335
+                    },
+                    "position-left": {},
+                    "width": 50
+                },
+                "content": {
+                    "type": "flowLayout",
+                    "contents": [
+                        {
+                            "type": "UIImage",
+                            "id": "thermiaIcon",
+                            "image": "ClimateConditions:Normal",
+                            "layoutInfo": {
+                                "position-left": {
+                                    "offset": 10
+                                },
+                                "position-vertical-center": {},
+                                "height": 30,
+                                "width": 30
+                            }
+                        },
+                        {
+                            "type": "UILabel",
+                            "id": "thermiaLevelLabel",
+                            "text": "",
+                            "layoutInfo": {
+                                "use-content-width": true,
+                                "position-horizontal-center": {},
+                                "height": 30
+                            }
+                        }
+                    ],
+                    "layoutInfo": {
+                        "position-horizontal-center": {},
+                        "position-vertical-center": {},
+                        "use-content-width": true,
+                        "height": 50
+                    }
+                }
+            }
+        ]
+    }
+}
